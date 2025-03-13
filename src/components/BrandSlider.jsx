@@ -91,7 +91,7 @@ const BrandSlider = () => {
 	}, [])
 
 	return (
-		<div className='overflow-hidden relative bg-white py-4 shadow-lg'>
+		<div className='overflow-hidden relative bg-white py-5 md:py-8 shadow-lg'>
 			<div
 				ref={sliderRef}
 				className='flex items-center space-x-8 w-max animate-scroll'

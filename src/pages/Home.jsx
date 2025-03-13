@@ -1,4 +1,9 @@
-import { HeroSection, BrandSlider, WhyChooseUs } from '../components'
+import {
+	HeroSection,
+	BrandSlider,
+	WhyChooseUs,
+	StepsSection,
+} from '../components'
 
 const Home = () => {
 	return (
@@ -6,6 +11,8 @@ const Home = () => {
 			<HeroSection />
 			<BrandSlider />
 			<WhyChooseUs />
+			{/* ЗДЕСЬ БУДЕТ КАЛЬКУЛЯТОР */}
+			<StepsSection />
 		</>
 	)
 }
