@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom'
 const HeroSection = () => {
 	return (
 		<section
-			className='relative w-full h-[80vh] flex items-center justify-center bg-cover bg-center text-white px-5'
+			className='relative w-full h-[80vh] flex items-center justify-center bg-cover bg-center text-white px-5 mt-10 md:mt-0'
 			style={{
 				backgroundImage:
 					"url('https://static.vecteezy.com/system/resources/previews/027/533/475/non_2x/car-or-bike-smokie-background-realistic-ai-generative-free-photo.jpg')",

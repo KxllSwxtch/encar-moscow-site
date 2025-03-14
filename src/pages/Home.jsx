@@ -3,6 +3,7 @@ import {
 	BrandSlider,
 	WhyChooseUs,
 	StepsSection,
+	CalculatorSection,
 } from '../components'
 
 const Home = () => {
@@ -11,7 +12,7 @@ const Home = () => {
 			<HeroSection />
 			<BrandSlider />
 			<WhyChooseUs />
-			{/* ЗДЕСЬ БУДЕТ КАЛЬКУЛЯТОР */}
+			<CalculatorSection />
 			<StepsSection />
 		</>
 	)

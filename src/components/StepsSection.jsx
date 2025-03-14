@@ -49,8 +49,8 @@ const StepsSection = () => {
 						className={`flex flex-col md:flex-row items-center ${
 							index % 2 === 0 ? 'md:flex-row-reverse' : ''
 						}`}
-						initial={{ opacity: 0, x: index % 2 === 0 ? 50 : -50 }}
-						whileInView={{ opacity: 1, x: 0 }}
+						initial={{ opacity: 0 }}
+						whileInView={{ opacity: 1 }}
 						transition={{ duration: 0.8, delay: index * 0.2 }}
 						viewport={{ once: true }}
 					>
