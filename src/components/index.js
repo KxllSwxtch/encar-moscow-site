@@ -7,6 +7,7 @@ import CarCard from './CarCard'
 import Loader from './Loader'
 import CarInspection from './CarInspection'
 import CalculatorSection from './CalculatorSection'
+import Footer from './Footer'
 
 export {
 	Header,
@@ -18,4 +19,5 @@ export {
 	Loader,
 	CarInspection,
 	CalculatorSection,
+	Footer,
 }

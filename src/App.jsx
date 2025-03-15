@@ -1,11 +1,12 @@
 import AppRoutes from './routes'
-import { Header } from './components'
+import { Footer, Header } from './components'
 
 const App = () => {
 	return (
 		<>
 			<Header />
 			<AppRoutes />
+			<Footer />
 		</>
 	)
 }

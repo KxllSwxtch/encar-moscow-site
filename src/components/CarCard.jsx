@@ -67,7 +67,7 @@ const CarCard = ({ car, usdKrwRate }) => {
 			{/* Кнопка "Подробнее" */}
 			<div className='p-4 text-center'>
 				<Link
-					to={`/export-catalog/${car.LOT}`}
+					to={`/catalog/${car.LOT}`}
 					target='_blank'
 					rel='noopener noreferrer'
 					className='inline-block bg-black hover:bg-gray-800 text-white font-semibold py-2 px-4 rounded-sm transition duration-300'

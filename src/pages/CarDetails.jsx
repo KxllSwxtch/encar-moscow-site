@@ -186,14 +186,6 @@ const CarDetails = () => {
 		setLoadingCalc(true)
 		setErrorCalc('')
 
-		// Логика расчёта логистики
-		let logisticsCostKrw = 2040000 // По умолчанию для всех санкционных авто
-		let logisticsCostUsd = logisticsCostKrw / usdKrwRate
-		let logisticsCostRub = logisticsCostUsd * usdRubRate
-
-		if (car?.spec?.displacement > 2000)
-			logisticsCostUsd = logisticsCostUsd + 200
-
 		try {
 			const response = await axios.post(
 				'https://corsproxy.io/?key=28174bc7&url=https://calcus.ru/calculate/Customs',
@@ -229,21 +221,27 @@ const CarDetails = () => {
 				data.total2.split(',')[0].split(' ').join(''),
 			)
 
-			const totalWithLogisticsRub = formattedTotal + logisticsCostRub
-			const totalCarWithLogisticsRub = formattedTotal2 + logisticsCostRub
-			const totalCarWithLogisticsUsd = totalCarWithLogisticsRub / usdRubRate
-			const totalCarWithLogisticsUsdt =
-				totalCarWithLogisticsRub / meanUsdtRubRate
+			// Логика расчёта общей стоимости
+			const carPriceRub = formattedTotal2
+			const brokerServices = 120000
+			const customsFees = formattedTotal
+			const deliveryByTruck = 210000
+			const deliveryByLorry = 240000
+
+			const totalWithTruck =
+				carPriceRub + customsFees + brokerServices + deliveryByTruck
+			const totalWithLorry =
+				carPriceRub + customsFees + brokerServices + deliveryByLorry
 
 			setCalculatedResult({
 				...data,
-				logisticsCostRub,
-				logisticsCostKrw,
-				logisticsCostUsd,
-				totalWithLogisticsRub,
-				totalCarWithLogisticsRub,
-				totalCarWithLogisticsUsd,
-				totalCarWithLogisticsUsdt,
+				carPriceRub,
+				customsFees,
+				brokerServices,
+				deliveryByTruck,
+				deliveryByLorry,
+				totalWithTruck,
+				totalWithLorry,
 			})
 		} catch (err) {
 			setErrorCalc(err.message)
@@ -375,71 +373,34 @@ const CarDetails = () => {
 			{/* Контакты менеджеров */}
 			<div className='mt-6 p-5 bg-white shadow-md rounded-lg text-center flex justify-center gap-20'>
 				<div>
-					<h2 className='text-xl font-semibold mb-4'>
-						Для заказа автомобиля из Кореи
-					</h2>
+					<h2 className='text-xl font-semibold mb-4'>Контакты</h2>
 					<p className='text-gray-700'>
-						<strong>Рамис:</strong>{' '}
+						<strong>Вячеслав:</strong>{' '}
 						<a
-							href='tel:+821080296232'
+							href='tel:821032728558'
 							className='text-blue-600 hover:underline'
 						>
-							+82 10-8029-6232
+							+82 10-3272-8558
 						</a>
 					</p>
 					<p className='text-gray-700'>
 						<a
 							target='_blank'
-							href='https://wa.me/821080296232'
+							href='https://wa.me/821032728558'
 							className='text-blue-600 hover:underline flex justify-center items-center'
 						>
 							<FaWhatsapp className='text-green-600 text-xl mr-1' />
-							+82 10-8029-6232
+							+82 10-3272-8558
 						</a>
 					</p>
 					<p className='text-gray-700'>
 						<a
 							target='_blank'
-							href='https://www.instagram.com/ramis_auto_korea/'
+							href='https://www.instagram.com/koreaexcar/'
 							className='text-blue-600 hover:underline flex justify-center items-center'
 						>
 							<FaInstagram className='text-pink-600 text-xl mr-1' />
-							@ramis_auto_korea
-						</a>
-					</p>
-				</div>
-
-				<div>
-					<h2 className='text-xl font-semibold mb-4'>
-						Для приобретения авто внутри Кореи
-					</h2>
-					<p className='text-gray-700'>
-						<strong>Артём:</strong>{' '}
-						<a
-							href='tel:+821080296232'
-							className='text-blue-600 hover:underline'
-						>
-							+82 10-8282-8062
-						</a>
-					</p>
-					<p className='text-gray-700'>
-						<a
-							target='_blank'
-							href='https://wa.me/821082828062'
-							className='text-blue-600 hover:underline flex justify-center items-center'
-						>
-							<FaWhatsapp className='text-green-600 text-xl mr-1' />
-							+82 10-8282-8062
-						</a>
-					</p>
-					<p className='text-gray-700'>
-						<a
-							target='_blank'
-							href='https://www.instagram.com/auto_korea_cheongju'
-							className='text-blue-600 hover:underline flex justify-center items-center'
-						>
-							<FaInstagram className='text-pink-600 text-xl mr-1' />
-							@auto_korea_cheongju
+							@koreaexcar
 						</a>
 					</p>
 				</div>
@@ -493,54 +454,80 @@ const CarDetails = () => {
 			)}
 
 			{calculatedResult && selectedCountry === 'russia' && (
-				<div className='mt-6 p-5 bg-gray-50 shadow-md rounded-lg text-center'>
-					<h2 className='text-xl font-semibold mb-4'>Расчёт для России</h2>
-					<p className='text-gray-600'>
-						Стоимость автомобиля: ₩{carPriceKorea.toLocaleString()} | $
-						{carPriceUsd.toLocaleString()} |{' '}
-						{Math.round(carPriceRub).toLocaleString()} ₽
-					</p>
-					<br />
-					<p className='text-gray-600'>
-						Расходы по Корее: ₩
-						{calculatedResult?.logisticsCostKrw.toLocaleString()} | $
-						{calculatedResult?.logisticsCostUsd.toLocaleString()} |{' '}
-						{calculatedResult?.logisticsCostRub.toLocaleString()} ₽
-					</p>
-					<br />
-					<br />
-					<h3 className='font-bold text-xl'>Расходы во Владивостоке</h3>
-					<p className='text-gray-600'>
-						Таможенная пошлина: {calculatedResult?.tax?.toLocaleString()} ₽
-					</p>
-					<p className='text-gray-600'>
-						Таможенный сбор: {calculatedResult?.sbor?.toLocaleString()} ₽
-					</p>
-					<p className='text-gray-600'>
-						Утилизационный сбор: {calculatedResult?.util?.toLocaleString()} ₽
-					</p>
-					{/* <p className='text-gray-600'>
-						Итого (таможенные платежи во Владивостоке):{' '}
-						{calculatedResult?.total?.toLocaleString()} ₽
-					</p> */}
-					<p className='text-black font-medium text-lg mx-auto mt-10'>
-						Стоимость автомобиля под ключ во Владивостоке: <br />$
-						{Math.round(
-							calculatedResult?.totalCarWithLogisticsUsd,
-							2,
-						).toLocaleString('en-US')}{' '}
-						|{' '}
-						{calculatedResult?.totalCarWithLogisticsRub?.toLocaleString(
-							'ru-RU',
-						)}{' '}
-						₽
-					</p>
-					<p className='text-black font-medium text-lg mx-auto mt-10'>
-						Стоимость автомобиля под ключ во Владивостоке (USDT): <br />$
-						{Math.round(
-							calculatedResult?.totalCarWithLogisticsUsdt,
-						).toLocaleString('en-US')}{' '}
-					</p>
+				<div className='mt-6 p-6 bg-white shadow-lg rounded-lg text-center border border-gray-200'>
+					<h2 className='text-2xl font-bold text-gray-900 mb-6'>
+						Расчёт стоимости под ключ
+					</h2>
+
+					<div className='grid grid-cols-1 md:grid-cols-2 gap-6 text-lg text-gray-700'>
+						{/* Стоимость автомобиля */}
+						<div className='p-4 bg-gray-100 rounded-lg shadow-sm flex flex-col justify-center'>
+							<h3 className='text-xl font-semibold text-gray-800'>
+								Стоимость автомобиля
+							</h3>
+							<p className='mt-2 font-bold text-gray-900'>
+								₩{carPriceKorea.toLocaleString()} | $
+								{carPriceUsd.toLocaleString()} |{' '}
+								{Math.round(carPriceRub).toLocaleString()} ₽
+							</p>
+						</div>
+
+						{/* Таможенные платежи */}
+						<div className='p-4 bg-gray-100 rounded-lg shadow-sm'>
+							<h3 className='text-xl font-semibold text-gray-800'>
+								Таможенные платежи
+							</h3>
+							<p className='mt-2'>
+								📌 Таможенная пошлина:{' '}
+								<strong>{calculatedResult?.tax?.toLocaleString()} ₽</strong>
+							</p>
+							<p>
+								📌 Таможенный сбор:{' '}
+								<strong>{calculatedResult?.sbor?.toLocaleString()} ₽</strong>
+							</p>
+							<p>
+								📌 Утилизационный сбор:{' '}
+								<strong>{calculatedResult?.util?.toLocaleString()} ₽</strong>
+							</p>
+						</div>
+
+						{/* Брокерские услуги */}
+						<div className='p-4 bg-gray-100 rounded-lg shadow-sm flex flex-col justify-center'>
+							<h3 className='text-xl font-semibold text-gray-800'>
+								Дополнительные расходы
+							</h3>
+							<p className='mt-2'>
+								💼 Брокерские услуги: <strong>120,000 ₽</strong>
+							</p>
+						</div>
+
+						{/* Доставка */}
+						<div className='p-4 bg-gray-100 rounded-lg shadow-sm'>
+							<h3 className='text-xl font-semibold text-gray-800'>Доставка</h3>
+							<p className='mt-2'>
+								🚛 Автовоз: <strong>210,000 ₽</strong>
+							</p>
+							<p>
+								🚚 Фура: <strong>240,000 ₽</strong>
+							</p>
+						</div>
+					</div>
+
+					{/* Итоговая стоимость */}
+					<div className='mt-8 p-5 bg-gray-200 rounded-lg shadow-md text-lg font-semibold text-gray-900'>
+						<p>
+							✅ Итоговая стоимость с доставкой автовозом:{' '}
+							<strong>
+								{calculatedResult?.totalWithTruck.toLocaleString()} ₽
+							</strong>
+						</p>
+						<p className='mt-2'>
+							✅ Итоговая стоимость с доставкой фурой:{' '}
+							<strong>
+								{calculatedResult?.totalWithLorry.toLocaleString()} ₽
+							</strong>
+						</p>
+					</div>
 				</div>
 			)}
 

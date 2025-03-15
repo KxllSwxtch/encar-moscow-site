@@ -47,6 +47,9 @@ const Header = () => {
 					<Link to='/contact' className='hover:text-red-500'>
 						Контакты
 					</Link>
+					<a href='#calculator' className='hover:text-red-500'>
+						Калькулятор
+					</a>
 				</nav>
 
 				<div className='flex items-center space-x-4'>
