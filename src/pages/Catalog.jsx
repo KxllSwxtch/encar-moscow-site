@@ -132,7 +132,9 @@ const Catalog = () => {
 		try {
 			setLoading(true)
 			const response = await axios.get(
-				`https://corsproxy.io/?url=${`https://api.darvin.digital/api.php?method=get_cars&marka_id=${filters.brand}&model_id=${filters.model}&year_from=${filters.yearFrom}&year_to=${filters.yearTo}&mileage_from=${filters.mileageFrom}&mileage_to=${filters.mileageTo}&engine_from=${filters.capacityFrom}&engine_to=${filters.capacityTo}&price_from=${filters.priceFrom}&price_to=${filters.priceTo}&sort=${sortOption}&page=${pageNumber}`}`,
+				`https://corsproxy.io/?url=${encodeURIComponent(
+					`https://api.darvin.digital/api.php?method=get_cars&marka_id=${filters.brand}&model_id=${filters.model}&year_from=${filters.yearFrom}&year_to=${filters.yearTo}&mileage_from=${filters.mileageFrom}&mileage_to=${filters.mileageTo}&engine_from=${filters.capacityFrom}&engine_to=${filters.capacityTo}&price_from=${filters.priceFrom}&price_to=${filters.priceTo}&sort=${sortOption}&page=${pageNumber}`,
+				)}`,
 			)
 			const newCars = response.data
 
@@ -148,7 +150,7 @@ const Catalog = () => {
 	const fetchTotalCars = async () => {
 		try {
 			const response = await axios.get(
-				`https://corsproxy.io/${encodeURIComponent(
+				`https://corsproxy.io/?url=${encodeURIComponent(
 					`https://api.darvin.digital/api.php?method=get_cars_count&marka_id=${filters.brand}&model_id=${filters.model}&year_from=${filters.yearFrom}&year_to=${filters.yearTo}&mileage_from=${filters.mileageFrom}&mileage_to=${filters.mileageTo}&engine_from=${filters.capacityFrom}&engine_to=${filters.capacityTo}&price_from=${filters.priceFrom}&price_to=${filters.priceTo}&sort=${sortOption}`,
 				)}`,
 			)
@@ -757,7 +759,7 @@ const Catalog = () => {
 
 				{/* Сетка карточек автомобилей */}
 				{cars.length > 0 ? (
-					<div className='grid grid-cols-1 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 w-full md:ml-5'>
+					<div className='grid grid-cols-1 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 w-full md:ml-5'>
 						{cars.map((car) => (
 							<CarCard usdKrwRate={usdKrwRate} key={car.ID} car={car} />
 						))}

@@ -161,10 +161,10 @@ const CalculatorSection = () => {
 	}
 
 	return (
-		<div className='bg-white p-6 container m-auto max-w-200' id='calculator'>
-			<h2 className='text-center text-2xl font-bold mb-10' id='calculator'>
+		<div className='bg-white container m-auto max-w-300' id='calculator'>
+			{/* <h2 className='text-center text-2xl font-bold mb-10' id='calculator'>
 				Калькулятор таможенных платежей во Владивостоке
-			</h2>
+			</h2> */}
 
 			<div className='grid grid-cols-1 lg:grid-cols-2 gap-6'>
 				<div>

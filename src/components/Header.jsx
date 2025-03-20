@@ -26,28 +26,46 @@ const Header = () => {
 	}
 
 	return (
-		<header className='fixed top-0 left-0 w-full bg-white shadow-md z-50'>
+		<header className='fixed top-0 left-0 w-full bg-white z-50 p-5 shadow-md'>
 			{/* Desktop Header */}
 			<div className='hidden md:flex justify-between items-center'>
 				<Link to='/' className='flex items-center space-x-2'>
 					<img
-						src='https://encarrussia.ru/thumb/2/AbZl4VMNdZKS2i9wRkMZ1g/1200r1200/d/photo-2024-06-30-16-41-51_1_1.jpg'
+						src='https://res.cloudinary.com/pomegranitedesign/image/upload/v1742461723/EncarMoscow/logo.png'
 						alt='Logo'
-						className='h-20 ml-20'
+						className='h-10 ml-20'
 					/>
 				</Link>
 
 				<nav className='hidden md:flex space-x-6 text-lg font-semibold'>
-					<Link to='/about' className='hover:text-red-500'>
+					<Link
+						to='/about'
+						className='hover:text-red-500 transition-all duration-300'
+					>
 						О нас
 					</Link>
-					<Link to='/catalog' className='hover:text-red-500'>
+					<Link
+						to='/catalog'
+						className='hover:text-red-500 transition-all duration-300'
+					>
 						Каталог автомобилей
 					</Link>
-					<Link to='/contact' className='hover:text-red-500'>
+					<Link
+						to='/contact'
+						className='hover:text-red-500 transition-all duration-300'
+					>
 						Контакты
 					</Link>
-					<a href='#calculator' className='hover:text-red-500'>
+					<Link
+						className='hover:text-red-500 transition-all duration-300'
+						to='/why-us'
+					>
+						6 причин выбрать нас
+					</Link>
+					<a
+						href='#calculator'
+						className='hover:text-red-500 transition-all duration-300'
+					>
 						Калькулятор
 					</a>
 				</nav>
@@ -82,11 +100,13 @@ const Header = () => {
 
 			{/* Mobile Header */}
 			<div className='flex md:hidden justify-between items-center px-4 py-4'>
-				<img
-					src='https://encarrussia.ru/thumb/2/AbZl4VMNdZKS2i9wRkMZ1g/1200r1200/d/photo-2024-06-30-16-41-51_1_1.jpg'
-					alt='Logo'
-					className='h-8'
-				/>
+				<Link to='/'>
+					<img
+						src='https://res.cloudinary.com/pomegranitedesign/image/upload/v1742461723/EncarMoscow/logo.png'
+						alt='Logo'
+						className='h-8'
+					/>
+				</Link>
 				<button onClick={toggleMenu} className='text-gray-700'>
 					{menuOpen ? (
 						<XMarkIcon className='w-8 h-8' />
@@ -119,11 +139,13 @@ const Header = () => {
 					>
 						{/* Логотип и кнопка закрытия */}
 						<div className='flex justify-between items-center'>
-							<img
-								src='https://encarrussia.ru/thumb/2/AbZl4VMNdZKS2i9wRkMZ1g/1200r1200/d/photo-2024-06-30-16-41-51_1_1.jpg'
-								alt='Logo'
-								className='h-20 mx-auto'
-							/>
+							<Link to='/'>
+								<img
+									src='https://res.cloudinary.com/pomegranitedesign/image/upload/v1742461723/EncarMoscow/logo.png'
+									alt='Logo'
+									className='h-20 mx-auto'
+								/>
+							</Link>
 							<button
 								onClick={() => setMenuOpen(false)}
 								className='text-gray-700'

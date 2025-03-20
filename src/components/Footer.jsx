@@ -1,14 +1,18 @@
+import { Link } from 'react-router-dom'
+
 const Footer = () => {
 	return (
 		<footer className='bg-white text-black py-12'>
 			<div className='container mx-auto px-6 flex flex-col md:flex-row justify-between items-center'>
 				{/* Логотип */}
 				<div className='mb-6 md:mb-0 flex flex-col items-center md:items-start'>
-					<img
-						src='https://encarrussia.ru/thumb/2/AbZl4VMNdZKS2i9wRkMZ1g/1200r1200/d/photo-2024-06-30-16-41-51_1_1.jpg'
-						alt='Encar Moscow Logo'
-						className='h-14'
-					/>
+					<Link to='/'>
+						<img
+							src='https://res.cloudinary.com/pomegranitedesign/image/upload/v1742461723/EncarMoscow/logo.png'
+							alt='Encar Moscow Logo'
+							className='h-14'
+						/>
+					</Link>
 					<p className='text-gray-400 mt-3 text-sm text-center md:text-left'>
 						Надежные автомобили из Южной Кореи
 					</p>

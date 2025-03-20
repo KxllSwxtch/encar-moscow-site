@@ -1,5 +1,12 @@
 import { Routes, Route } from 'react-router-dom'
-import { Home, Catalog, About, Contact, CarDetails } from '../pages'
+import {
+	Home,
+	Catalog,
+	About,
+	Contact,
+	CarDetails,
+	WhyChooseUs,
+} from '../pages'
 
 const AppRoutes = () => {
 	return (
@@ -9,6 +16,7 @@ const AppRoutes = () => {
 			<Route path='/catalog/:carId' element={<CarDetails />} />
 			<Route path='/about' element={<About />} />
 			<Route path='/contact' element={<Contact />} />
+			<Route path='/why-us' element={<WhyChooseUs />} />
 		</Routes>
 	)
 }
