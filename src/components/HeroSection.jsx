@@ -58,12 +58,22 @@ const HeroSection = () => {
 			<div className='relative z-10 flex flex-col md:flex-row items-center max-w-6xl w-full'>
 				{/* Текстовая часть */}
 				<div className='w-full md:w-2/3 space-y-6'>
-					<h1 className='text-4xl md:text-5xl font-bold uppercase leading-tight'>
+					<motion.h1
+						className='text-4xl md:text-5xl font-bold uppercase leading-tight'
+						initial={{ opacity: 0, y: 40 }}
+						animate={{ opacity: 1, y: 0 }}
+						transition={{ duration: 0.6, ease: 'easeOut', delay: 0.2 }}
+					>
 						Автомобили из <br /> Южной Кореи под ключ <br />
 						<span className='text-red-500'>без посредников</span>
-					</h1>
+					</motion.h1>
 
-					<ul className='space-y-3 text-lg'>
+					<motion.ul
+						className='space-y-3 text-lg'
+						initial={{ opacity: 0, y: 40 }}
+						animate={{ opacity: 1, y: 0 }}
+						transition={{ duration: 0.6, ease: 'easeOut', delay: 0.4 }}
+					>
 						<li className='flex items-start'>
 							<span className='text-red-500 text-xl mr-3'>●</span>
 							Полное сопровождение сделки от заключения договора <br />
@@ -73,10 +83,14 @@ const HeroSection = () => {
 							<span className='text-red-500 text-xl mr-3'>●</span>
 							Профессиональные брокеры в России и странах СНГ
 						</li>
-					</ul>
+					</motion.ul>
 
-					{/* Кнопки */}
-					<div className='md:flex md:space-x-4 grid grid-cols-1 gap-2'>
+					<motion.div
+						className='md:flex md:space-x-4 grid grid-cols-1 gap-2'
+						initial={{ opacity: 0, y: 40 }}
+						animate={{ opacity: 1, y: 0 }}
+						transition={{ duration: 0.6, ease: 'easeOut', delay: 0.6 }}
+					>
 						<button
 							onClick={openModal}
 							className='bg-red-600 hover:bg-red-800 text-white py-3 px-6 text-lg font-semibold rounded-md transition-colors duration-300 text-center cursor-pointer'
@@ -90,7 +104,7 @@ const HeroSection = () => {
 						>
 							Смотреть каталог автомобилей
 						</Link>
-					</div>
+					</motion.div>
 				</div>
 
 				{/* Видео (YouTube Embed) */}
