@@ -46,7 +46,7 @@ const HeroSection = () => {
 
 	return (
 		<section
-			className='relative w-full h-screen flex items-center justify-center bg-cover bg-center text-white px-5 pt-20 pb-20 md:pt-0 md:pb-0'
+			className='relative w-full h-full md:h-screen flex items-center justify-center bg-cover bg-center text-white px-5 pt-20 pb-20 md:pt-0 md:pb-0'
 			style={{
 				backgroundImage:
 					"url('https://static.vecteezy.com/system/resources/previews/027/533/475/non_2x/car-or-bike-smokie-background-realistic-ai-generative-free-photo.jpg')",
