@@ -1,7 +1,7 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline'
-import { Link } from 'react-router-dom'
+import { Link, useLocation } from 'react-router-dom'
 
 const menuVariants = {
 	hidden: { x: '100%' },
@@ -20,20 +20,47 @@ const backdropVariants = {
 
 const Header = () => {
 	const [menuOpen, setMenuOpen] = useState(false)
+	const [showHeader, setShowHeader] = useState(false)
+	const location = useLocation()
+
+	useEffect(() => {
+		if (location.pathname !== '/') {
+			setShowHeader(true)
+			return
+		}
+
+		const handleScroll = () => {
+			if (window.scrollY > 10) {
+				setShowHeader(true)
+			} else {
+				setShowHeader(false)
+			}
+		}
+
+		window.addEventListener('scroll', handleScroll)
+		return () => {
+			window.removeEventListener('scroll', handleScroll)
+		}
+	}, [location])
 
 	const toggleMenu = () => {
 		setMenuOpen(!menuOpen)
 	}
 
 	return (
-		<header className='fixed top-0 left-0 w-full bg-white z-50 p-5 shadow-md'>
+		<motion.header
+			className='fixed top-0 left-0 w-full bg-white z-50 shadow-md'
+			initial={{ opacity: 0, y: -50 }}
+			animate={{ opacity: showHeader ? 1 : 0, y: showHeader ? 0 : -50 }}
+			transition={{ duration: 0.3 }}
+		>
 			{/* Desktop Header */}
 			<div className='hidden md:flex justify-between items-center'>
 				<Link to='/' className='flex items-center space-x-2'>
 					<img
-						src='https://res.cloudinary.com/pomegranitedesign/image/upload/v1742461723/EncarMoscow/logo.png'
+						src='https://res.cloudinary.com/pomegranitedesign/image/upload/v1742517574/EncarMoscow/encar_logo.webp'
 						alt='Logo'
-						className='h-10 ml-20'
+						className='h-25 ml-20'
 					/>
 				</Link>
 
@@ -60,17 +87,13 @@ const Header = () => {
 						className='hover:text-red-500 transition-all duration-300'
 						to='/why-us'
 					>
-						6 причин выбрать нас
+						7 причин выбрать нас
 					</Link>
-					<a
-						href='#calculator'
-						className='hover:text-red-500 transition-all duration-300'
-					>
-						Калькулятор
-					</a>
+					<Link to='/for-partners'>Для партнёров</Link>
 				</nav>
 
 				<div className='flex items-center space-x-4'>
+					<p>Вячеслав</p>
 					<a href='tel:+821032728558' className='text-gray-700 font-semibold'>
 						+82 10-3272-8558
 					</a>
@@ -102,7 +125,7 @@ const Header = () => {
 			<div className='flex md:hidden justify-between items-center px-4 py-4'>
 				<Link to='/'>
 					<img
-						src='https://res.cloudinary.com/pomegranitedesign/image/upload/v1742461723/EncarMoscow/logo.png'
+						src='https://res.cloudinary.com/pomegranitedesign/image/upload/v1742517574/EncarMoscow/encar_logo.webp'
 						alt='Logo'
 						className='h-8'
 					/>
@@ -141,7 +164,7 @@ const Header = () => {
 						<div className='flex justify-between items-center'>
 							<Link to='/'>
 								<img
-									src='https://res.cloudinary.com/pomegranitedesign/image/upload/v1742461723/EncarMoscow/logo.png'
+									src='https://res.cloudinary.com/pomegranitedesign/image/upload/v1742517574/EncarMoscow/encar_logo.webp'
 									alt='Logo'
 									className='h-20 mx-auto'
 								/>
@@ -171,11 +194,10 @@ const Header = () => {
 								Каталог автомобилей
 							</Link>
 							<Link
-								to='/calculator'
-								className='hover:text-red-500'
-								onClick={toggleMenu}
+								className='hover:text-red-500 transition-all duration-300'
+								to='/why-us'
 							>
-								Узнать стоимость
+								7 причин выбрать нас
 							</Link>
 							<Link
 								to='/favorites'
@@ -184,17 +206,11 @@ const Header = () => {
 							>
 								Избранное
 							</Link>
-							<Link
-								to='/brands'
-								className='hover:text-red-500'
-								onClick={toggleMenu}
-							>
-								Марки авто
-							</Link>
 						</nav>
 
 						{/* Контакты */}
 						<div className='flex flex-col items-center text-lg font-semibold'>
+							<p>Вячеслав</p>
 							<a href='tel:+821032728558' className='text-black'>
 								+82 10-3272-8558
 							</a>
@@ -234,7 +250,7 @@ const Header = () => {
 					</motion.div>
 				</>
 			)}
-		</header>
+		</motion.header>
 	)
 }
 

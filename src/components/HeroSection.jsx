@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Link } from 'react-router-dom'
 import CalculatorSection from './CalculatorSection'
@@ -8,6 +8,7 @@ const HeroSection = () => {
 	const [name, setName] = useState('')
 	const [phone, setPhone] = useState('')
 	const [message, setMessage] = useState('')
+	const [latestVideoId, setLatestVideoId] = useState(null)
 
 	const openModal = () => setIsModalOpen(true)
 	const closeModal = () => setIsModalOpen(false)
@@ -23,9 +24,29 @@ const HeroSection = () => {
 		window.open(whatsappUrl, '_blank')
 	}
 
+	useEffect(() => {
+		const fetchLatestVideo = async () => {
+			const API_KEY = 'AIzaSyAB3idei-7vTnDclriYXU_Fp_QEnsEvGKk' // Заменить на свой API ключ
+			const CHANNEL_ID = 'UCOkFdDKSE_ECh-PFE2kBQTA' // ID канала KoreaExCar
+			const API_URL = `https://www.googleapis.com/youtube/v3/search?key=${API_KEY}&channelId=${CHANNEL_ID}&order=date&part=snippet&type=video&maxResults=1`
+
+			try {
+				const response = await fetch(API_URL)
+				const data = await response.json()
+				if (data.items.length > 0) {
+					setLatestVideoId(data.items[0].id.videoId)
+				}
+			} catch (error) {
+				console.error('Ошибка загрузки видео:', error)
+			}
+		}
+
+		fetchLatestVideo()
+	}, [])
+
 	return (
 		<section
-			className='relative w-full h-[80vh] flex items-center justify-center bg-cover bg-center text-white px-5 mt-10 md:mt-0'
+			className='relative w-full h-screen flex items-center justify-center bg-cover bg-center text-white px-5 pt-20 pb-20 md:pt-0 md:pb-0'
 			style={{
 				backgroundImage:
 					"url('https://static.vecteezy.com/system/resources/previews/027/533/475/non_2x/car-or-bike-smokie-background-realistic-ai-generative-free-photo.jpg')",
@@ -73,16 +94,19 @@ const HeroSection = () => {
 				</div>
 
 				{/* Видео (YouTube Embed) */}
-				<div className='hidden md:block w-full md:w-1/3'>
-					<div className='relative w-full h-48 md:h-56'>
-						<iframe
-							className='w-full h-full rounded-md shadow-lg'
-							src='https://www.youtube.com/embed/your-video-id?rel=0&showinfo=0&autoplay=0'
-							title='Как заказать автомобиль'
-							allowFullScreen
-						></iframe>
+				{latestVideoId && (
+					<div className='mt-20 md:mt-0 block w-full md:w-1/3'>
+						<div className='relative w-full h-48 md:h-130'>
+							<iframe
+								className='w-full h-full rounded-md shadow-lg'
+								src={`https://www.youtube.com/embed/${latestVideoId}?rel=0&showinfo=0&autoplay=1&controls=0`}
+								title='Последнее видео с Youtube канала KoreaExCar'
+								allow='autoplay; encrypted-media'
+								allowFullScreen
+							></iframe>
+						</div>
 					</div>
-				</div>
+				)}
 			</div>
 
 			{/* Модальное окно с анимацией */}
@@ -90,7 +114,7 @@ const HeroSection = () => {
 			<AnimatePresence>
 				{isModalOpen && (
 					<motion.div
-						className='fixed inset-0 flex items-center justify-center z-50 text-black before:content-[""] before:absolute before:inset-0 before:bg-black before:opacity-50'
+						className='fixed inset-0 flex items-center justify-center z-50 text-black before:content-[""] before:absolute before:inset-0 before:bg-black before:opacity-50 overflow-scroll pt-40 md:pt-0'
 						initial={{ opacity: 0 }}
 						animate={{ opacity: 1 }}
 						exit={{ opacity: 0 }}
@@ -162,6 +186,34 @@ const HeroSection = () => {
 					</motion.div>
 				)}
 			</AnimatePresence>
+
+			{/* Анимированная стрелка вниз */}
+			<button
+				onClick={() =>
+					window.scrollBy({ top: window.innerHeight * 0.9, behavior: 'smooth' })
+				}
+				className='absolute bottom-8 left-1/2 transform -translate-x-1/2 z-10 cursor-pointer'
+			>
+				<motion.div
+					animate={{ y: [0, 10, 0] }}
+					transition={{ repeat: Infinity, duration: 2, ease: 'easeInOut' }}
+				>
+					<svg
+						xmlns='http://www.w3.org/2000/svg'
+						fill='none'
+						viewBox='0 0 24 24'
+						strokeWidth={2}
+						stroke='white'
+						className='w-8 h-8 animate-bounce'
+					>
+						<path
+							strokeLinecap='round'
+							strokeLinejoin='round'
+							d='M19 9l-7 7-7-7'
+						/>
+					</svg>
+				</motion.div>
+			</button>
 		</section>
 	)
 }

@@ -31,6 +31,11 @@ const reasons = [
 		title: 'Цены без посредников',
 		text: 'Работаем без посредников, что позволяет нам предложить прямые цены без накруток.',
 	},
+	{
+		id: '07',
+		title: 'Индивидуальный подход',
+		text: 'Подбираем автомобили под ваши требования, учитывая бюджет, предпочтения и цели эксплуатации.',
+	},
 ]
 
 const WhyChooseUs = () => {
@@ -50,7 +55,7 @@ const WhyChooseUs = () => {
 				transition={{ duration: 0.8, delay: 0.2 }}
 				viewport={{ once: true }}
 			>
-				6 ПРИЧИН ВЫБРАТЬ НАС
+				7 ПРИЧИН ВЫБРАТЬ НАС
 			</motion.h2>
 			<motion.p
 				className='text-gray-600 max-w-3xl mx-auto mt-4'
@@ -65,7 +70,7 @@ const WhyChooseUs = () => {
 			</motion.p>
 
 			{/* Сетка с причинами */}
-			<div className='grid grid-cols-1 md:grid-cols-3 gap-10 mt-12 max-w-5xl mx-auto'>
+			<div className='grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-10 mt-12 max-w-5xl mx-auto'>
 				{reasons.map((reason, index) => (
 					<motion.div
 						key={reason.id}

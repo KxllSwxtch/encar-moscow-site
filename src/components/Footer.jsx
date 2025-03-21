@@ -8,7 +8,7 @@ const Footer = () => {
 				<div className='mb-6 md:mb-0 flex flex-col items-center md:items-start'>
 					<Link to='/'>
 						<img
-							src='https://res.cloudinary.com/pomegranitedesign/image/upload/v1742461723/EncarMoscow/logo.png'
+							src='https://res.cloudinary.com/pomegranitedesign/image/upload/v1742517574/EncarMoscow/encar_logo.webp'
 							alt='Encar Moscow Logo'
 							className='h-14'
 						/>

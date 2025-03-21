@@ -4,7 +4,7 @@ const PartnersSection = () => {
 	return (
 		<section className='py-12 bg-gray-50 text-center'>
 			<h2 className='text-4xl font-bold mb-10 text-gray-900 uppercase tracking-wide'>
-				Наши партнёры
+				Официальные партнёры Encar
 			</h2>
 
 			{/* Логотипы партнёров */}
@@ -14,11 +14,11 @@ const PartnersSection = () => {
 					alt='KoreaExCar Logo'
 					className='h-24 w-auto object-contain'
 				/>
-				<img
+				{/* <img
 					src='https://res.cloudinary.com/pomegranitedesign/image/upload/v1742462590/EncarMoscow/vimotorslogo.jpg'
 					alt='ViMotors Logo'
 					className='h-24 w-auto object-contain rounded-md'
-				/>
+				/> */}
 			</div>
 
 			{/* Разделительная линия */}
@@ -34,14 +34,14 @@ const PartnersSection = () => {
 				>
 					<FaInstagram className='text-3xl text-white' /> KoreaExCar
 				</a>
-				<a
+				{/* <a
 					href='https://www.instagram.com/vi_motors'
 					target='_blank'
 					rel='noopener noreferrer'
 					className='bg-gradient-to-r from-[#E1306C] to-[#833AB4] shadow-md p-5 rounded-full text-white text-xl flex items-center gap-3 hover:scale-105 transition-transform duration-300 hover:shadow-lg'
 				>
 					<FaInstagram className='text-3xl text-white' /> ViMotors
-				</a>
+				</a> */}
 				<a
 					href='https://t.me/koreaexcar23'
 					target='_blank'
@@ -56,7 +56,7 @@ const PartnersSection = () => {
 					rel='noopener noreferrer'
 					className='bg-gradient-to-r from-[#FF0000] to-[#C00] shadow-md p-5 rounded-full text-white text-xl flex items-center gap-3 hover:scale-105 transition-transform duration-300 hover:shadow-lg'
 				>
-					<FaYoutube className='text-3xl text-white' /> YouTube канал
+					<FaYoutube className='text-3xl text-white' /> KoreaExCar YouTube-канал
 				</a>
 			</div>
 		</section>

@@ -5,7 +5,7 @@ const App = () => {
 	return (
 		<>
 			<Header />
-			<main className='mt-15 md:mt-20'>
+			<main className=''>
 				<AppRoutes />
 			</main>
 			<Footer />

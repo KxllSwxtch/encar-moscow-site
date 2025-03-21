@@ -43,7 +43,7 @@ const CalculatorSection = () => {
 					power_unit: 1,
 					value: engineVolume,
 					price: carPrice,
-					curr: 'KRW',
+					curr: 'USD',
 				}).toString(),
 				{
 					withCredentials: false,
@@ -169,7 +169,7 @@ const CalculatorSection = () => {
 			<div className='grid grid-cols-1 lg:grid-cols-2 gap-6'>
 				<div>
 					<label className='block text-sm font-medium text-gray-700 mb-1'>
-						Цена (KRW)
+						Цена (USD)
 					</label>
 					<input
 						type='text'
@@ -188,6 +188,26 @@ const CalculatorSection = () => {
 					<label className='block text-sm font-medium text-gray-700 mb-1'>
 						Объем двигателя (см³)
 					</label>
+
+					{/* Популярные объёмы */}
+					<div className='flex flex-wrap gap-2 mb-2'>
+						{[1500, 1600, 1800, 2000, 2200, 2500, 3000, 3500, 4400].map(
+							(val) => (
+								<button
+									type='button'
+									key={val}
+									className='px-3 py-1 bg-gray-200 hover:bg-gray-300 text-sm rounded-md transition'
+									onClick={() =>
+										handleEngineVolumeChange({ target: { value: val } })
+									}
+								>
+									{val.toLocaleString()}
+								</button>
+							),
+						)}
+					</div>
+
+					{/* Ручной ввод */}
 					<input
 						type='number'
 						placeholder='Введите объем'
@@ -196,6 +216,7 @@ const CalculatorSection = () => {
 						required
 						onChange={handleEngineVolumeChange}
 					/>
+
 					{errors.engineVolume && (
 						<p className='text-red-500 text-sm mt-1'>{errors.engineVolume}</p>
 					)}
@@ -292,15 +313,34 @@ const CalculatorSection = () => {
 					</p>
 					<br />
 					<p>
+						Услуги брокера
+						<br />
+						<strong>120 000,00 ₽</strong>
+					</p>
+					<br />
+					<p>
 						Итого
 						<br />
-						<strong>{result?.total || 'Ошибка в расчёте'} ₽</strong>
+						<strong>
+							{(
+								parseFloat(result?.total.replace(/\s/g, '').replace(',', '.')) +
+								120000
+							).toLocaleString() || 'Ошибка в расчёте'}{' '}
+							₽
+						</strong>
 					</p>
 					<br />
 					<p>
 						Стоимость Автомобиля + Таможенные платежи
 						<br />
-						<strong>{result?.total2 || 'Ошибка в расчёте'} ₽</strong>
+						<strong>
+							{(
+								parseFloat(
+									result?.total2.replace(/\s/g, '').replace(',', '.'),
+								) + 120000
+							).toLocaleString() || 'Ошибка в расчёте'}{' '}
+							₽
+						</strong>
 					</p>
 				</div>
 			)}
