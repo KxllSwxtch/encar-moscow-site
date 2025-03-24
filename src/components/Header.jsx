@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline'
 import { Link, useLocation } from 'react-router-dom'
+import { useAuth } from '../hooks/useAuth'
 
 const menuVariants = {
 	hidden: { x: '100%' },
@@ -19,6 +20,7 @@ const backdropVariants = {
 }
 
 const Header = () => {
+	const auth = useAuth()
 	const [menuOpen, setMenuOpen] = useState(false)
 	const [showHeader, setShowHeader] = useState(false)
 	const location = useLocation()
@@ -46,6 +48,9 @@ const Header = () => {
 	const toggleMenu = () => {
 		setMenuOpen(!menuOpen)
 	}
+
+	if (!auth) return null
+	const { user } = auth
 
 	return (
 		<motion.header
@@ -90,6 +95,30 @@ const Header = () => {
 						7 причин выбрать нас
 					</Link>
 					<Link to='/for-partners'>Для партнёров</Link>
+					{user ? (
+						user.role === 'manager' ? (
+							<Link
+								to='/manager-dashboard'
+								className='hover:text-red-500 transition-all duration-300'
+							>
+								Панель менеджера
+							</Link>
+						) : (
+							<Link
+								to='/my-cars'
+								className='hover:text-red-500 transition-all duration-300'
+							>
+								Мои авто
+							</Link>
+						)
+					) : (
+						<Link
+							to='/signup'
+							className='hover:text-red-500 transition-all duration-300'
+						>
+							Вход / Регистрация
+						</Link>
+					)}
 				</nav>
 
 				<div className='flex items-center space-x-4'>
@@ -206,6 +235,33 @@ const Header = () => {
 							>
 								Избранное
 							</Link>
+							{user ? (
+								user.role === 'manager' ? (
+									<Link
+										to='/manager-dashboard'
+										className='hover:text-red-500'
+										onClick={toggleMenu}
+									>
+										Панель менеджера
+									</Link>
+								) : (
+									<Link
+										to='/my-cars'
+										className='hover:text-red-500'
+										onClick={toggleMenu}
+									>
+										Мои авто
+									</Link>
+								)
+							) : (
+								<Link
+									to='/signup'
+									className='hover:text-red-500'
+									onClick={toggleMenu}
+								>
+									Вход / Регистрация
+								</Link>
+							)}
 						</nav>
 
 						{/* Контакты */}

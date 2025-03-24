@@ -7,6 +7,8 @@ import {
 	CarDetails,
 	WhyChooseUs,
 	ForPartners,
+	SignUp,
+	Login,
 } from '../pages'
 
 const AppRoutes = () => {
@@ -19,6 +21,8 @@ const AppRoutes = () => {
 			<Route path='/contact' element={<Contact />} />
 			<Route path='/why-us' element={<WhyChooseUs />} />
 			<Route path='/for-partners' element={<ForPartners />} />
+			<Route path='/signup' element={<SignUp />} />
+			<Route path='/login' element={<Login />} />
 		</Routes>
 	)
 }

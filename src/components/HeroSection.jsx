@@ -113,7 +113,7 @@ const HeroSection = () => {
 						<div className='relative w-full h-48 md:h-130'>
 							<iframe
 								className='w-full h-full rounded-md shadow-lg'
-								src={`https://www.youtube.com/embed/${latestVideoId}?rel=0&showinfo=0&autoplay=1&controls=0`}
+								src={`https://www.youtube.com/embed/${latestVideoId}?rel=0&showinfo=0&autoplay=0&controls=0`}
 								title='Последнее видео с Youtube канала KoreaExCar'
 								allow='autoplay; encrypted-media'
 								allowFullScreen
