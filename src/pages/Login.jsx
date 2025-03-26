@@ -50,6 +50,12 @@ const Login = () => {
 					</button>
 					{error && <p className='text-red-600 text-sm'>{error}</p>}
 				</form>
+				<p className='mt-4 text-center text-sm text-gray-600'>
+					Нет аккаунта?{' '}
+					<a href='/signup' className='text-red-600 hover:underline'>
+						Зарегистрироваться
+					</a>
+				</p>
 			</div>
 		</div>
 	)

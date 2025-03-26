@@ -3,13 +3,13 @@ import { Footer, Header } from './components'
 
 const App = () => {
 	return (
-		<>
+		<div className='min-h-screen flex flex-col'>
 			<Header />
-			<main className=''>
+			<main className='flex-grow'>
 				<AppRoutes />
 			</main>
 			<Footer />
-		</>
+		</div>
 	)
 }
 

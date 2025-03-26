@@ -1,6 +1,6 @@
 const Contact = () => {
 	return (
-		<section className='container mx-auto px-6 py-12'>
+		<section className='container mx-auto px-6 py-30 md:py-35'>
 			<h1 className='text-3xl font-bold text-center mb-6'>Свяжитесь с нами</h1>
 			<p className='text-center text-gray-600 mb-12'>
 				Если у вас есть вопросы, мы всегда готовы помочь! Вы можете связаться с

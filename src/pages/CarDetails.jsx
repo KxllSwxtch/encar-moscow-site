@@ -294,7 +294,7 @@ const CarDetails = () => {
 		usdtRubRates?.reduce((a, b) => a + b, 0) / usdtRubRates?.length + 2
 
 	return (
-		<div className='container mx-auto mt-25 md:mt-25 p-6 bg-white shadow-lg rounded-lg'>
+		<div className='container mx-auto mt-24 md:mt-30 p-6 bg-white shadow-lg rounded-lg'>
 			<h1 className='text-3xl font-bold text-center mb-6'>
 				{car?.category?.manufacturerEnglishName}{' '}
 				{car?.category?.modelGroupEnglishName} {car?.category?.gradeEnglishName}

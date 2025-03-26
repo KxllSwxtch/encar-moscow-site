@@ -1,14 +1,16 @@
 import { useState, useEffect } from 'react'
-import { motion } from 'framer-motion'
+import { motion, AnimatePresence } from 'framer-motion'
 import { Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline'
 import { Link, useLocation } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
+import { signOut } from 'firebase/auth'
+import { auth as firebaseAuth } from '../firebase'
 
 const menuVariants = {
 	hidden: { x: '100%' },
 	visible: {
 		x: 0,
-		transition: { type: 'spring', stiffness: 100, damping: 15 },
+		transition: { type: 'tween', ease: 'easeOut', duration: 0.4 },
 	},
 	exit: { x: '100%', transition: { ease: 'easeInOut', duration: 0.3 } },
 }
@@ -52,6 +54,14 @@ const Header = () => {
 	if (!auth) return null
 	const { user } = auth
 
+	const handleLogout = async () => {
+		try {
+			await signOut(firebaseAuth)
+		} catch (error) {
+			console.error('Ошибка при выходе:', error)
+		}
+	}
+
 	return (
 		<motion.header
 			className='fixed top-0 left-0 w-full bg-white z-50 shadow-md'
@@ -65,7 +75,7 @@ const Header = () => {
 					<img
 						src='https://res.cloudinary.com/pomegranitedesign/image/upload/v1742517574/EncarMoscow/encar_logo.webp'
 						alt='Logo'
-						className='h-25 ml-20'
+						className='h-30 ml-20'
 					/>
 				</Link>
 
@@ -94,7 +104,9 @@ const Header = () => {
 					>
 						7 причин выбрать нас
 					</Link>
-					<Link to='/for-partners'>Для партнёров</Link>
+					<Link className='hover:text-red-500 duration-300' to='/for-partners'>
+						Для партнёров
+					</Link>
 					{user ? (
 						user.role === 'manager' ? (
 							<Link
@@ -114,10 +126,21 @@ const Header = () => {
 					) : (
 						<Link
 							to='/signup'
+							onClick={() =>
+								window.scrollTo({ top: 0, left: 0, behavior: 'smooth' })
+							}
 							className='hover:text-red-500 transition-all duration-300'
 						>
 							Вход / Регистрация
 						</Link>
+					)}
+					{user && (
+						<button
+							onClick={handleLogout}
+							className='hover:text-red-500 transition-all duration-300 cursor-pointer'
+						>
+							Выйти
+						</button>
 					)}
 				</nav>
 
@@ -156,7 +179,7 @@ const Header = () => {
 					<img
 						src='https://res.cloudinary.com/pomegranitedesign/image/upload/v1742517574/EncarMoscow/encar_logo.webp'
 						alt='Logo'
-						className='h-8'
+						className='h-16'
 					/>
 				</Link>
 				<button onClick={toggleMenu} className='text-gray-700'>
@@ -169,143 +192,164 @@ const Header = () => {
 			</div>
 
 			{/* Полупрозрачный фон + Mobile Menu */}
-			{menuOpen && (
-				<>
-					{/* Полупрозрачный фон */}
-					<motion.div
-						className='fixed inset-0 bg-black bg-opacity-50 backdrop-blur-md z-40'
-						variants={backdropVariants}
-						initial='hidden'
-						animate='visible'
-						exit='exit'
-						onClick={() => setMenuOpen(false)} // Теперь меню закроется правильно
-					/>
+			<AnimatePresence>
+				{menuOpen && (
+					<>
+						{/* Полупрозрачный фон */}
+						<motion.div
+							className='fixed inset-0 bg-black bg-opacity-50 backdrop-blur-md z-40'
+							variants={backdropVariants}
+							initial='hidden'
+							animate='visible'
+							exit='exit'
+							onClick={() => setMenuOpen(false)}
+						/>
 
-					{/* Mobile Menu */}
-					<motion.div
-						variants={menuVariants}
-						initial='hidden'
-						animate='visible'
-						exit='exit'
-						className='fixed top-0 right-0 w-[85%] h-screen bg-white p-6 z-50 flex flex-col justify-between shadow-lg'
-					>
-						{/* Логотип и кнопка закрытия */}
-						<div className='flex justify-between items-center'>
-							<Link to='/'>
-								<img
-									src='https://res.cloudinary.com/pomegranitedesign/image/upload/v1742517574/EncarMoscow/encar_logo.webp'
-									alt='Logo'
-									className='h-20 mx-auto'
-								/>
-							</Link>
-							<button
-								onClick={() => setMenuOpen(false)}
-								className='text-gray-700'
-							>
-								<XMarkIcon className='w-8 h-8' />
-							</button>
-						</div>
+						{/* Mobile Menu */}
+						<motion.div
+							variants={menuVariants}
+							initial='hidden'
+							animate='visible'
+							exit='exit'
+							className='fixed top-0 right-0 w-[85%] h-screen bg-white p-6 z-50 flex flex-col justify-between shadow-lg'
+						>
+							{/* Логотип и кнопка закрытия */}
+							<div className='flex justify-between items-center'>
+								<Link to='/'>
+									<img
+										src='https://res.cloudinary.com/pomegranitedesign/image/upload/v1742517574/EncarMoscow/encar_logo.webp'
+										alt='Logo'
+										className='h-20 mx-auto'
+									/>
+								</Link>
+								<button
+									onClick={() => setMenuOpen(false)}
+									className='text-gray-700'
+								>
+									<XMarkIcon className='w-8 h-8' />
+								</button>
+							</div>
 
-						{/* Навигация */}
-						<nav className='flex flex-col space-y-4 text-xl font-semibold'>
-							<Link
-								to='/about'
-								className='hover:text-red-500'
-								onClick={toggleMenu}
-							>
-								О нас
-							</Link>
-							<Link
-								to='/catalog'
-								className='hover:text-red-500'
-								onClick={toggleMenu}
-							>
-								Каталог автомобилей
-							</Link>
-							<Link
-								className='hover:text-red-500 transition-all duration-300'
-								to='/why-us'
-							>
-								7 причин выбрать нас
-							</Link>
-							<Link
-								to='/favorites'
-								className='hover:text-red-500'
-								onClick={toggleMenu}
-							>
-								Избранное
-							</Link>
-							{user ? (
-								user.role === 'manager' ? (
-									<Link
-										to='/manager-dashboard'
-										className='hover:text-red-500'
-										onClick={toggleMenu}
-									>
-										Панель менеджера
-									</Link>
-								) : (
-									<Link
-										to='/my-cars'
-										className='hover:text-red-500'
-										onClick={toggleMenu}
-									>
-										Мои авто
-									</Link>
-								)
-							) : (
+							{/* Навигация */}
+							<nav className='flex flex-col space-y-4 text-xl font-semibold'>
 								<Link
-									to='/signup'
+									to='/about'
 									className='hover:text-red-500'
 									onClick={toggleMenu}
 								>
-									Вход / Регистрация
+									О нас
 								</Link>
-							)}
-						</nav>
+								<Link
+									to='/catalog'
+									className='hover:text-red-500 transition-all'
+									onClick={toggleMenu}
+								>
+									Каталог автомобилей
+								</Link>
+								<Link
+									className='hover:text-red-500 transition-all duration-300'
+									to='/why-us'
+								>
+									7 причин выбрать нас
+								</Link>
+								<Link
+									className='hover:text-red-500 duration-300'
+									to='/for-partners'
+								>
+									Для партнёров
+								</Link>
 
-						{/* Контакты */}
-						<div className='flex flex-col items-center text-lg font-semibold'>
-							<p>Вячеслав</p>
-							<a href='tel:+821032728558' className='text-black'>
-								+82 10-3272-8558
-							</a>
-							<div className='flex space-x-4 mt-4'>
-								<a
-									href='https://instagram.com/yourprofile'
-									className='text-red-600 text-3xl'
+								<div className='w-full border-t border-gray-300'></div>
+								<Link
+									to='/favorites'
+									className='hover:text-red-500 transition-all'
+									onClick={toggleMenu}
 								>
-									<i className='fab fa-instagram'></i>
+									Избранное
+								</Link>
+								{user ? (
+									user.role === 'manager' ? (
+										<Link
+											to='/manager-dashboard'
+											className='hover:text-red-500 transition-all'
+											onClick={toggleMenu}
+										>
+											Панель менеджера
+										</Link>
+									) : (
+										<Link
+											to='/my-cars'
+											className='hover:text-red-500 transition-all'
+											onClick={toggleMenu}
+										>
+											Мои авто
+										</Link>
+									)
+								) : (
+									<Link
+										to='/signup'
+										className='hover:text-red-500 transition-all'
+										onClick={toggleMenu}
+									>
+										Вход / Регистрация
+									</Link>
+								)}
+								{user && (
+									<button
+										onClick={() => {
+											handleLogout()
+											toggleMenu()
+										}}
+										className='text-left hover:text-red-500 transition-all duration-300 cursor-pointer'
+									>
+										Выйти
+									</button>
+								)}
+							</nav>
+
+							{/* Контакты */}
+							<div className='flex flex-col items-center text-lg font-semibold'>
+								<p>Вячеслав</p>
+								<a href='tel:+821032728558' className='text-black'>
+									+82 10-3272-8558
 								</a>
-								<a
-									href='https://wa.me/821032728558'
-									className='text-red-600 text-3xl'
-								>
-									<i className='fab fa-whatsapp'></i>
-								</a>
-								<a href='tel:+821051402772' className='text-red-600 text-3xl'>
-									<i className='fas fa-phone-alt'></i>
-								</a>
-								<a
-									href='https://t.me/yourchannel'
-									className='text-red-600 text-3xl'
-								>
-									<i className='fab fa-telegram-plane'></i>
-								</a>
+								<div className='flex space-x-4 mt-4'>
+									<a
+										href='https://instagram.com/yourprofile'
+										className='text-red-600 text-3xl'
+									>
+										<i className='fab fa-instagram'></i>
+									</a>
+									<a
+										href='https://wa.me/821032728558'
+										className='text-red-600 text-3xl'
+									>
+										<i className='fab fa-whatsapp'></i>
+									</a>
+									<a href='tel:+821051402772' className='text-red-600 text-3xl'>
+										<i className='fas fa-phone-alt'></i>
+									</a>
+									<a
+										href='https://t.me/yourchannel'
+										className='text-red-600 text-3xl'
+									>
+										<i className='fab fa-telegram-plane'></i>
+									</a>
+								</div>
 							</div>
-						</div>
 
-						{/* Кнопка расчета стоимости */}
-						<Link
-							to='/calculator'
-							className='bg-red-600 text-white py-4 px-6 text-center rounded-md text-lg font-semibold w-full'
-							onClick={toggleMenu}
-						>
-							Расчет стоимости
-						</Link>
-					</motion.div>
-				</>
-			)}
+							{/* Кнопка расчета стоимости */}
+							<Link
+								to='/calculator'
+								className='bg-red-600 text-white py-4 px-6 text-center rounded-md text-lg font-semibold w-full'
+								onClick={toggleMenu}
+							>
+								Расчет стоимости
+							</Link>
+						</motion.div>
+					</>
+				)}
+			</AnimatePresence>
 		</motion.header>
 	)
 }
