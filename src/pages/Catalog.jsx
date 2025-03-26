@@ -513,7 +513,7 @@ const Catalog = () => {
 	}
 
 	return (
-		<div className='mt-25 md:mt-30 m-auto'>
+		<div className='mt-24 md:mt-29 m-auto'>
 			<a
 				className='mb-10 block'
 				href='https://www.youtube.com/@koreaexcar'

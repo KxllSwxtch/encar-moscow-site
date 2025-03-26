@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline'
 import { Link, useLocation } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
 import { signOut } from 'firebase/auth'
 import { auth as firebaseAuth } from '../firebase'
@@ -52,11 +53,14 @@ const Header = () => {
 	}
 
 	if (!auth) return null
+	// eslint-disable-next-line
+	const navigate = useNavigate()
 	const { user } = auth
 
 	const handleLogout = async () => {
 		try {
 			await signOut(firebaseAuth)
+			navigate('/')
 		} catch (error) {
 			console.error('Ошибка при выходе:', error)
 		}
@@ -117,7 +121,7 @@ const Header = () => {
 							</Link>
 						) : (
 							<Link
-								to='/my-cars'
+								to='/favorites'
 								className='hover:text-red-500 transition-all duration-300'
 							>
 								Мои авто
@@ -260,13 +264,6 @@ const Header = () => {
 								</Link>
 
 								<div className='w-full border-t border-gray-300'></div>
-								<Link
-									to='/favorites'
-									className='hover:text-red-500 transition-all'
-									onClick={toggleMenu}
-								>
-									Избранное
-								</Link>
 								{user ? (
 									user.role === 'manager' ? (
 										<Link
@@ -278,7 +275,7 @@ const Header = () => {
 										</Link>
 									) : (
 										<Link
-											to='/my-cars'
+											to='/favorites'
 											className='hover:text-red-500 transition-all'
 											onClick={toggleMenu}
 										>

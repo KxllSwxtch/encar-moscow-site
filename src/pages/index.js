@@ -7,6 +7,7 @@ import WhyChooseUs from './WhyChooseUs'
 import ForPartners from './ForPartners'
 import SignUp from './SignUp'
 import Login from './Login'
+import Favorites from './Favorites'
 
 export {
 	Home,
@@ -18,4 +19,5 @@ export {
 	ForPartners,
 	SignUp,
 	Login,
+	Favorites,
 }

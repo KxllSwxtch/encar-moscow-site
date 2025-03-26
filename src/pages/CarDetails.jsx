@@ -9,6 +9,9 @@ import 'swiper/css'
 import 'swiper/css/navigation'
 import 'swiper/css/pagination'
 import { Loader, CarInspection } from '../components'
+import { useAuth } from '../hooks/useAuth'
+import { db } from '../firebase'
+import { doc, getDoc, setDoc, updateDoc, arrayUnion } from 'firebase/firestore'
 
 const translations = {
 	price: 'Цена в Корее (₩)',
@@ -78,6 +81,7 @@ const CarDetails = () => {
 	const [calculatedResult, setCalculatedResult] = useState(null)
 
 	const { carId } = useParams()
+	const { user } = useAuth() // Пользователь
 
 	useEffect(() => {
 		const fetchCar = async () => {
@@ -128,7 +132,7 @@ const CarDetails = () => {
 
 	useEffect(() => {
 		const fetchUsdtRubRates = async () => {
-			const url = `https://corsproxy.io/${encodeURIComponent(
+			const url = `https://corsproxy.io/?url=${encodeURIComponent(
 				'https://www.bestchange.ru/action.php?lang=ru',
 			)}`
 
@@ -180,6 +184,35 @@ const CarDetails = () => {
 
 		fetchUsdtRubRates()
 	}, [])
+
+	const handleAddToFavorites = async () => {
+		if (!user) {
+			alert(
+				'Для того чтобы добавить этот автомобиль в избранное, пожалуйста зарегистрируйтесь или войдите в ваш аккаунт.',
+			)
+			return
+		}
+
+		try {
+			const userRef = doc(db, 'users', user.uid)
+			const docSnap = await getDoc(userRef)
+
+			if (!docSnap.exists()) {
+				await setDoc(userRef, {
+					email: user.email,
+					favorites: [carId],
+				})
+			} else {
+				await updateDoc(userRef, {
+					favorites: arrayUnion(carId),
+				})
+			}
+
+			alert('Автомобиль добавлен в избранное!')
+		} catch (error) {
+			console.error('Ошибка при добавлении в избранное:', error)
+		}
+	}
 
 	// Расчёт под ключ до РФ
 	const handleCalculate = async () => {
@@ -324,6 +357,14 @@ const CarDetails = () => {
 				</div>
 			)}
 
+			<div className='flex justify-end mb-4'>
+				<button
+					onClick={handleAddToFavorites}
+					className='bg-red-600 text-white px-6 py-2 rounded hover:bg-red-700 transition cursor-pointer'
+				>
+					❤️ Добавить в избранное
+				</button>
+			</div>
 			{/* Данные об автомобиле */}
 			<div className='mt-6 p-5 bg-gray-50 shadow-md rounded-lg'>
 				<p className='text-gray-600'>

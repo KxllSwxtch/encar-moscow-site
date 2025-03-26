@@ -9,6 +9,7 @@ import {
 	ForPartners,
 	SignUp,
 	Login,
+	Favorites,
 } from '../pages'
 
 const AppRoutes = () => {
@@ -23,6 +24,7 @@ const AppRoutes = () => {
 			<Route path='/for-partners' element={<ForPartners />} />
 			<Route path='/signup' element={<SignUp />} />
 			<Route path='/login' element={<Login />} />
+			<Route path='/favorites' element={<Favorites />} />
 		</Routes>
 	)
 }

@@ -1,7 +1,14 @@
 const Loader = () => {
 	return (
 		<div className='fixed inset-0 flex items-center justify-center bg-white z-50'>
-			<div className='border-4 border-accent-500 border-t-transparent rounded-full w-12 h-12 animate-spin'></div>
+			<div className='wrapper'>
+				<div className='circle'></div>
+				<div className='circle'></div>
+				<div className='circle'></div>
+				<div className='shadow'></div>
+				<div className='shadow'></div>
+				<div className='shadow'></div>
+			</div>
 		</div>
 	)
 }
