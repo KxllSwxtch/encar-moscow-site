@@ -41,7 +41,7 @@ const reasons = [
 const WhyChooseUs = () => {
 	return (
 		<motion.section
-			className='py-16 bg-white text-center'
+			className='py-35 md:py-40 bg-white text-center'
 			initial={{ opacity: 0, y: 50 }}
 			whileInView={{ opacity: 1, y: 0 }}
 			transition={{ duration: 0.8, ease: 'easeOut' }}

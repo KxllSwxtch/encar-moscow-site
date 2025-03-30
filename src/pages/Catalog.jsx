@@ -127,12 +127,12 @@ const Catalog = () => {
 		{ value: 'CREATE_AT-DESC', label: 'По дате добавления' },
 	]
 
-	// Функция для получения данных с API
+	// Функция для получения данных с APIy
 	const fetchCars = async (pageNumber = 1) => {
 		try {
 			setLoading(true)
 			const response = await axios.get(
-				`https://corsproxy.io/?url=${encodeURIComponent(
+				`https://encar-moscow-proxy.onrender.com/api/proxy?url=${encodeURIComponent(
 					`https://api.darvin.digital/api.php?method=get_cars&marka_id=${filters.brand}&model_id=${filters.model}&year_from=${filters.yearFrom}&year_to=${filters.yearTo}&mileage_from=${filters.mileageFrom}&mileage_to=${filters.mileageTo}&engine_from=${filters.capacityFrom}&engine_to=${filters.capacityTo}&price_from=${filters.priceFrom}&price_to=${filters.priceTo}&sort=${sortOption}&page=${pageNumber}`,
 				)}`,
 			)
@@ -150,7 +150,7 @@ const Catalog = () => {
 	const fetchTotalCars = async () => {
 		try {
 			const response = await axios.get(
-				`https://corsproxy.io/?url=${encodeURIComponent(
+				`https://encar-moscow-proxy.onrender.com/api/proxy?url=${encodeURIComponent(
 					`https://api.darvin.digital/api.php?method=get_cars_count&marka_id=${filters.brand}&model_id=${filters.model}&year_from=${filters.yearFrom}&year_to=${filters.yearTo}&mileage_from=${filters.mileageFrom}&mileage_to=${filters.mileageTo}&engine_from=${filters.capacityFrom}&engine_to=${filters.capacityTo}&price_from=${filters.priceFrom}&price_to=${filters.priceTo}&sort=${sortOption}`,
 				)}`,
 			)
@@ -212,7 +212,7 @@ const Catalog = () => {
 	const fetchModels = async (brandId) => {
 		try {
 			const response = await axios.get(
-				`https://corsproxy.io/?url=${encodeURIComponent(
+				`https://encar-moscow-proxy.onrender.com/api/proxy?url=${encodeURIComponent(
 					`https://api.darvin.digital/api.php?method=get_model&marka_id=${brandId}`,
 				)}`,
 			)
@@ -333,6 +333,7 @@ const Catalog = () => {
 	// Применение фильтров
 	const applyFilters = () => {
 		setCurrentPage(1) // Сброс на первую страницу
+		fetchTotalCars() // Потом получаем количество страниц
 		fetchCars(1) // Перезагружаем список машин с новыми фильтрами
 	}
 
@@ -357,7 +358,7 @@ const Catalog = () => {
 
 	// Генерация кнопок пагинации
 	const renderPagination = () => {
-		const maxPageButtons = 5 // Количество страниц слева и справа
+		const maxPageButtons = 1 // Количество страниц слева и справа
 		const pageNumbers = []
 
 		const startPage = Math.max(1, currentPage - maxPageButtons)
@@ -423,7 +424,7 @@ const Catalog = () => {
 		}
 
 		return (
-			<div className='flex justify-center mt-10 mb-20'>
+			<div className='flex justify-center mt-10 mb-20 px-5'>
 				{/* Кнопка "Назад" */}
 				<button
 					onClick={() => changePage(currentPage - 1)}
@@ -531,9 +532,9 @@ const Catalog = () => {
 					Каталог авто в Корее
 				</h1>
 
-				<div className='md:flex md:flex-row md:justify-center grid grid-cols-1'>
+				<div className='md:flex md:gap-6'>
 					{/* Форма фильтрации */}
-					<div className='bg-white p-5 rounded-lg shadow-md md:w-1/3'>
+					<div className='bg-white p-5 rounded-lg shadow-md md:w-1/4'>
 						<form>
 							<div className='grid grid-cols-1 md:grid-cols-1 gap-4'>
 								<div>
@@ -772,7 +773,7 @@ const Catalog = () => {
 
 					{/* Сетка карточек автомобилей */}
 					{cars.length > 0 ? (
-						<div className='flex flex-col'>
+						<div className='flex flex-col md:w-3/4'>
 							<h2 className='mt-5 text-center font-medium md:mt-0 md:text-left md:ml-5 md:mb-5'>
 								Последнее поступление
 							</h2>
