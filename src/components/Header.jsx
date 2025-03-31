@@ -74,7 +74,7 @@ const Header = () => {
 			transition={{ duration: 0.3 }}
 		>
 			{/* Desktop Header */}
-			<div className='hidden md:flex justify-between items-center'>
+			<div className='hidden lg:flex justify-between items-center'>
 				<Link to='/' className='flex items-center space-x-2'>
 					<img
 						src='https://res.cloudinary.com/pomegranitedesign/image/upload/v1742517574/EncarMoscow/encar_logo.webp'
@@ -83,7 +83,7 @@ const Header = () => {
 					/>
 				</Link>
 
-				<nav className='hidden md:flex space-x-6 text-lg font-semibold'>
+				<nav className='hidden lg:flex lg:space-x-2 lg:text-md xl:text-lg xl:space-x-6 font-semibold'>
 					<Link
 						to='/about'
 						className='hover:text-red-500 transition-all duration-300'
@@ -108,9 +108,9 @@ const Header = () => {
 					>
 						7 причин выбрать нас
 					</Link>
-					<Link className='hover:text-red-500 duration-300' to='/for-partners'>
+					{/* <Link className='hover:text-red-500 duration-300' to='/for-partners'>
 						Для партнёров
-					</Link>
+					</Link> */}
 					{user ? (
 						user.role === 'manager' ? (
 							<Link
@@ -150,9 +150,14 @@ const Header = () => {
 
 				<div className='flex items-center space-x-4'>
 					<p>Вячеслав</p>
-					<a href='tel:+821032728558' className='text-gray-700 font-semibold'>
-						+82 10-3272-8558
-					</a>
+					<div className='flex flex-col'>
+						<a href='tel:821032728558' className='text-gray-700 font-semibold'>
+							+82 10-3272-8558 (Корея)
+						</a>
+						<a href='tel:89143491602' className='text-gray-700 font-semibold'>
+							+8 914-349-16-02 (РФ)
+						</a>
+					</div>
 					<a
 						href='https://t.me/yourchannel'
 						className='text-red-600 hover:opacity-80'
@@ -178,7 +183,7 @@ const Header = () => {
 			</div>
 
 			{/* Mobile Header */}
-			<div className='flex md:hidden justify-between items-center px-4 py-4'>
+			<div className='flex lg:hidden justify-between items-center px-4 py-4'>
 				<Link to='/'>
 					<img
 						src='https://res.cloudinary.com/pomegranitedesign/image/upload/v1742517574/EncarMoscow/encar_logo.webp'
@@ -256,14 +261,13 @@ const Header = () => {
 								>
 									7 причин выбрать нас
 								</Link>
-								<Link
+								{/* <Link
 									className='hover:text-red-500 duration-300'
 									to='/for-partners'
 								>
 									Для партнёров
-								</Link>
+								</Link> */}
 
-								<div className='w-full border-t border-gray-300'></div>
 								{user ? (
 									user.role === 'manager' ? (
 										<Link

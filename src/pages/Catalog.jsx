@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import Select from 'react-select'
+import { useLocation } from 'react-router-dom'
 import axios from 'axios'
 import { CarCard, Loader } from '../components'
 import { brandLogos } from '../utils'
@@ -24,6 +25,22 @@ const Catalog = () => {
 		priceFrom: '',
 		priceTo: '',
 	})
+
+	const location = useLocation()
+
+	useEffect(() => {
+		const params = new URLSearchParams(location.search)
+		const brandFromURL = params.get('brand')
+		const modelFromURL = params.get('model')
+
+		if (brandFromURL) {
+			setFilters((prev) => ({ ...prev, brand: brandFromURL }))
+			fetchModels(brandFromURL).then(() => {
+				setFilters((prev) => ({ ...prev, model: modelFromURL || '' }))
+				applyFilters()
+			})
+		}
+	}, [])
 
 	// Опции с логотипами брендов
 	const brandOptions = [
@@ -777,7 +794,7 @@ const Catalog = () => {
 							<h2 className='mt-5 text-center font-medium md:mt-0 md:text-left md:ml-5 md:mb-5'>
 								Последнее поступление
 							</h2>
-							<div className='grid grid-cols-1 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 w-full md:ml-5'>
+							<div className='grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 md:gap-8 w-full md:ml-5'>
 								{cars.map((car) => (
 									<CarCard usdKrwRate={usdKrwRate} key={car.ID} car={car} />
 								))}

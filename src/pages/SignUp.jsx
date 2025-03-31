@@ -66,14 +66,14 @@ const SignUp = () => {
 						className='w-full p-3 border rounded-md'
 						required
 					/>
-					<select
+					{/* <select
 						value={role}
 						onChange={(e) => setRole(e.target.value)}
 						className='w-full p-3 border rounded-md'
 					>
 						<option value='client'>Клиент</option>
 						<option value='manager'>Менеджер</option>
-					</select>
+					</select> */}
 					<button
 						type='submit'
 						className='w-full bg-red-600 text-white py-3 rounded-md hover:bg-red-700 transition'
