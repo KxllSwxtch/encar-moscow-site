@@ -266,35 +266,37 @@ const HeroSection = () => {
 					</motion.ul>
 
 					<motion.div
-						className='grid md:grid-cols-2 grid-cols-1 gap-4 w-full bg-white bg-opacity-90 p-5 rounded-lg shadow-lg'
+						className='grid md:grid-cols-1 grid-cols-1 gap-4 md:w-[60%] bg-white bg-opacity-90 p-5 rounded-lg shadow-lg'
 						initial={{ opacity: 0, y: 40 }}
 						animate={{ opacity: 1, y: 0 }}
 						transition={{ duration: 0.6, ease: 'easeOut', delay: 0.8 }}
 					>
-						<BrandSelect
-							filters={filters}
-							handleFilterChange={handleFilterChange}
-						/>
+						<div className=''>
+							<BrandSelect
+								filters={filters}
+								handleFilterChange={handleFilterChange}
+							/>
 
-						<Select
-							options={[
-								{ value: '', label: 'Выберите модель' },
-								...models.map((model) => ({
-									value: model.MODEL_NAME,
-									label: model.MODEL_NAME,
-								})),
-							]}
-							value={
-								selectedModel
-									? { value: selectedModel, label: selectedModel }
-									: { value: '', label: 'Выберите модель' }
-							}
-							onChange={(option) => setSelectedModel(option.value)}
-							isDisabled={!filters.brand}
-							className='text-black'
-							classNamePrefix='react-select'
-							isSearchable={false}
-						/>
+							<Select
+								options={[
+									{ value: '', label: 'Выберите модель' },
+									...models.map((model) => ({
+										value: model.MODEL_NAME,
+										label: model.MODEL_NAME,
+									})),
+								]}
+								value={
+									selectedModel
+										? { value: selectedModel, label: selectedModel }
+										: { value: '', label: 'Выберите модель' }
+								}
+								onChange={(option) => setSelectedModel(option.value)}
+								isDisabled={!filters.brand}
+								className='text-black mt-4'
+								classNamePrefix='react-select'
+								isSearchable={false}
+							/>
+						</div>
 
 						<button
 							onClick={() => handleSearch()}

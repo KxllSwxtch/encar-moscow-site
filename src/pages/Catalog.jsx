@@ -30,17 +30,24 @@ const Catalog = () => {
 
 	useEffect(() => {
 		const params = new URLSearchParams(location.search)
+		console.log(params)
+
 		const brandFromURL = params.get('brand')
 		const modelFromURL = params.get('model')
 
 		if (brandFromURL) {
-			setFilters((prev) => ({ ...prev, brand: brandFromURL }))
 			fetchModels(brandFromURL).then(() => {
-				setFilters((prev) => ({ ...prev, model: modelFromURL || '' }))
-				applyFilters()
+				setFilters((prev) => ({
+					...prev,
+					brand: brandFromURL,
+					model: modelFromURL || '',
+				}))
+				fetchCars()
 			})
+		} else {
+			fetchCars()
 		}
-	}, [])
+	}, [location.search])
 
 	// Опции с логотипами брендов
 	const brandOptions = [
