@@ -22,6 +22,8 @@ const CarInspection = ({ car }) => {
 				const response = await axios.get(url)
 
 				setInspectionData(response.data)
+
+				console.log(response.data)
 				setError(null)
 			} catch (err) {
 				setError('Ошибка при загрузке данных')

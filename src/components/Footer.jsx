@@ -64,7 +64,7 @@ const Footer = () => {
 			{/* Социальные сети */}
 			<div className='flex justify-center space-x-6'>
 				<a
-					href='https://t.me/yourchannel'
+					href='https://t.me/koreaexcar23'
 					className='text-red-500 text-2xl hover:opacity-80 transition'
 				>
 					<i className='fab fa-telegram-plane'></i>

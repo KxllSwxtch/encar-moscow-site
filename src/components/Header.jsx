@@ -159,7 +159,7 @@ const Header = () => {
 						</a>
 					</div>
 					<a
-						href='https://t.me/yourchannel'
+						href='https://t.me/koreaexcar23'
 						className='text-red-600 hover:opacity-80'
 					>
 						<i className='fab fa-telegram-plane text-2xl'></i>
@@ -331,7 +331,7 @@ const Header = () => {
 										<i className='fas fa-phone-alt'></i>
 									</a>
 									<a
-										href='https://t.me/yourchannel'
+										href='https://t.me/koreaexcar23'
 										className='text-red-600 text-3xl'
 									>
 										<i className='fab fa-telegram-plane'></i>

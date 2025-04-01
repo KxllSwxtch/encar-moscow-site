@@ -139,7 +139,7 @@ const KazakhstanCalculator = ({ usdKztRate, usdKrwRate, carPriceKRW }) => {
 	const calculateCosts = () => {
 		if (!price || !selectedVolume || !selectedYear) return
 
-		const koreaContainerUSD = 1800
+		const koreaContainerUSD = 2000
 		const koreaContainerKZT = koreaContainerUSD * usdKztRate
 
 		const koreaTransferUSD = 500000 / usdKrwRate

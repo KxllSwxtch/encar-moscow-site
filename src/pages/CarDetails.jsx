@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { Swiper, SwiperSlide } from 'swiper/react'
 import { Navigation, Pagination } from 'swiper/modules'
-import { FaInstagram, FaWhatsapp } from 'react-icons/fa'
+import { FaInstagram, FaTelegram, FaWhatsapp } from 'react-icons/fa'
 import { doc, getDoc, setDoc, updateDoc, arrayUnion } from 'firebase/firestore'
 import 'swiper/css'
 import 'swiper/css/navigation'
@@ -332,6 +332,10 @@ const CarDetails = () => {
 	const modelGroup = car?.category?.modelGroupEnglishName
 	const formattedModelGroup = modelGroup === 'Canival' ? 'Carnival' : modelGroup
 
+	const koreaExpensesKRW = 2200000
+	const koreaExpensesUSD = koreaExpensesKRW / usdKrwRate
+	const koreaExpensesRUB = koreaExpensesUSD * usdRubRate
+
 	return (
 		<div className='container mx-auto mt-24 md:mt-30 p-4 md:p-6 bg-white shadow-lg rounded-lg'>
 			<h1 className='text-3xl font-bold text-center mb-6'>
@@ -421,7 +425,7 @@ const CarDetails = () => {
 			<div className='mt-6 p-5 bg-white shadow-md rounded-lg text-center flex justify-center gap-20'>
 				<div>
 					<h2 className='text-xl font-semibold mb-4'>Контакты</h2>
-					<p className='text-gray-700'>
+					<p className='text-gray-700 mb-2'>
 						<strong>Вячеслав:</strong>{' '}
 						<a
 							href='tel:821032728558'
@@ -430,23 +434,33 @@ const CarDetails = () => {
 							+82 10-3272-8558
 						</a>
 					</p>
-					<p className='text-gray-700'>
+					<p className='text-gray-700 mb-2'>
 						<a
 							target='_blank'
 							href='https://wa.me/821032728558'
 							className='text-blue-600 hover:underline flex justify-center items-center'
 						>
 							<FaWhatsapp className='text-green-600 text-xl mr-1' />
-							+82 10-3272-8558
+							WhatsApp
 						</a>
 					</p>
-					<p className='text-gray-700'>
+					<p className='text-gray-700 mb-2'>
 						<a
 							target='_blank'
 							href='https://www.instagram.com/koreaexcar/'
 							className='text-blue-600 hover:underline flex justify-center items-center'
 						>
 							<FaInstagram className='text-pink-600 text-xl mr-1' />
+							@koreaexcar
+						</a>
+					</p>
+					<p className='text-gray-700'>
+						<a
+							target='_blank'
+							href='https://t.me/koreaexcar23'
+							className='text-blue-600 hover:underline flex justify-center items-center'
+						>
+							<FaTelegram className='text-blue-500 text-xl mr-1' />
 							@koreaexcar
 						</a>
 					</p>
@@ -556,6 +570,13 @@ const CarDetails = () => {
 							</h3>
 							<p className='mt-2'>
 								💼 Брокерские услуги: <strong>120,000 ₽</strong>
+							</p>
+							<p className='mt-2'>
+								Расходы по Корее + стояночные (
+								<span className='text-xs text-gray-500'>₩2 200 000</span>):{' '}
+								<strong>
+									{Math.round(koreaExpensesRUB).toLocaleString('ru-RU')} ₽
+								</strong>
 							</p>
 						</div>
 
