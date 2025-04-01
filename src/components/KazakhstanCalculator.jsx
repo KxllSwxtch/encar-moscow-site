@@ -417,16 +417,16 @@ const KazakhstanCalculator = ({ usdKztRate, usdKrwRate, carPriceKRW }) => {
 						</table>
 
 						<div className='mt-6 p-4 bg-blue-100 rounded-lg text-lg font-semibold space-y-3'>
-							<div className='flex justify-between'>
-								<span>💰 Общая растаможка:</span>
-								<span className='text-right'>
+							<div className='flex justify-between items-center'>
+								<span className='text-sm md:text-xl'>Общая растаможка:</span>
+								<span className='text-right text-[15px] md:text-xl'>
 									{formatNumber(calculation.totalExpenses)} ₸ /{' '}
 									{formatNumber(calculation.totalExpenses / exchangeRate)} $
 								</span>
 							</div>
-							<div className='flex justify-between'>
-								<span>🚗 Под ключ до Алматы:</span>
-								<span className='text-right'>
+							<div className='flex justify-between items-center'>
+								<span className='text-sm md:text-xl'>Под ключ до Алматы:</span>
+								<span className='text-right text-[15px] md:text-xl'>
 									{formatNumber(calculation.finalCostKZT)} ₸ /{' '}
 									{formatNumber(calculation.finalCostKZT / usdKztRate)} $
 								</span>

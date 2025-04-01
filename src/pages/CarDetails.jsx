@@ -247,35 +247,41 @@ const CarDetails = () => {
 
 			const data = await response.data
 
-			const formattedTotal = parseInt(
-				data.total.split(',')[0].split(' ').join(''),
-			)
-			const formattedTotal2 = parseInt(
-				data.total2.split(',')[0].split(' ').join(''),
+			const parsedTotal = parseInt(data.total.split(',')[0].replace(/\s/g, ''))
+			const parsedCarPrice = parseInt(
+				data.total2.split(',')[0].replace(/\s/g, ''),
 			)
 
-			// Логика расчёта общей стоимости
-			const carPriceRub = formattedTotal2
+			const carPriceRub = parsedCarPrice
+			const customsFees = parsedTotal
+
+			const koreaExpensesKRW = 1800000 + 440000
+			const koreaExpensesUSD = koreaExpensesKRW / usdKrwRate
+			const koreaExpensesRUB = koreaExpensesUSD * usdRubRate
+
 			const brokerServices = 120000
-			const customsFees = formattedTotal
 			const deliveryByTruck = 210000
 			const deliveryByLorry = 240000
 
+			// Правильный: используем total2 (carPriceRub), в который уже входит всё
 			const totalWithTruck =
-				carPriceRub + customsFees + brokerServices + deliveryByTruck
+				carPriceRub + brokerServices + koreaExpensesRUB + deliveryByTruck
 			const totalWithLorry =
-				carPriceRub + customsFees + brokerServices + deliveryByLorry
+				carPriceRub + brokerServices + koreaExpensesRUB + deliveryByLorry
 
 			setCalculatedResult({
 				...data,
 				carPriceRub,
 				customsFees,
+				koreaExpensesRUB: Math.round(koreaExpensesRUB),
 				brokerServices,
 				deliveryByTruck,
 				deliveryByLorry,
 				totalWithTruck,
 				totalWithLorry,
 			})
+
+			console.log(totalWithTruck, totalWithLorry)
 		} catch (err) {
 			setErrorCalc(err.message)
 		} finally {
@@ -332,9 +338,13 @@ const CarDetails = () => {
 	const modelGroup = car?.category?.modelGroupEnglishName
 	const formattedModelGroup = modelGroup === 'Canival' ? 'Carnival' : modelGroup
 
-	const koreaExpensesKRW = 2200000
+	const koreaExpensesKRW = 1800000
 	const koreaExpensesUSD = koreaExpensesKRW / usdKrwRate
 	const koreaExpensesRUB = koreaExpensesUSD * usdRubRate
+
+	const koreaParkingFeeKRW = 440000
+	const koreaParkingFeeUSD = koreaParkingFeeKRW / usdKrwRate
+	const koreaParkingFeeRUB = koreaParkingFeeUSD * usdRubRate
 
 	return (
 		<div className='container mx-auto mt-24 md:mt-30 p-4 md:p-6 bg-white shadow-lg rounded-lg'>
@@ -538,9 +548,9 @@ const CarDetails = () => {
 								Стоимость автомобиля
 							</h3>
 							<p className='mt-2 font-bold text-gray-900'>
-								₩{carPriceKorea.toLocaleString()} | $
-								{carPriceUsd.toLocaleString()} |{' '}
-								{Math.round(carPriceRub).toLocaleString()} ₽
+								₩{carPriceKorea.toLocaleString('ru-RU')} | $
+								{carPriceUsd.toLocaleString('ru-RU')} |{' '}
+								{Math.round(carPriceRub).toLocaleString('ru-RU')} ₽
 							</p>
 						</div>
 
@@ -572,10 +582,17 @@ const CarDetails = () => {
 								💼 Брокерские услуги: <strong>120,000 ₽</strong>
 							</p>
 							<p className='mt-2'>
-								Расходы по Корее + стояночные (
-								<span className='text-xs text-gray-500'>₩2 200 000</span>):{' '}
+								Логистика (
+								<span className='text-xs text-gray-500'>₩1 800 000</span>):{' '}
 								<strong>
 									{Math.round(koreaExpensesRUB).toLocaleString('ru-RU')} ₽
+								</strong>
+							</p>
+							<p className='mt-2'>
+								Стояночные (
+								<span className='text-xs text-gray-500'>₩440 000</span>):{' '}
+								<strong>
+									{Math.round(koreaParkingFeeRUB).toLocaleString('ru-RU')} ₽
 								</strong>
 							</p>
 						</div>
@@ -584,10 +601,10 @@ const CarDetails = () => {
 						<div className='p-4 bg-gray-100 rounded-lg shadow-sm'>
 							<h3 className='text-xl font-semibold text-gray-800'>Доставка</h3>
 							<p className='mt-2'>
-								🚛 Автовоз: <strong>210,000 ₽</strong>
+								🚛 Автовоз: <strong>210 000 ₽</strong>
 							</p>
 							<p>
-								🚚 Фура: <strong>240,000 ₽</strong>
+								🚚 Фура: <strong>240 000 ₽</strong>
 							</p>
 						</div>
 					</div>
@@ -597,13 +614,19 @@ const CarDetails = () => {
 						<p>
 							✅ Итоговая стоимость с доставкой автовозом:{' '}
 							<strong>
-								{calculatedResult?.totalWithTruck.toLocaleString()} ₽
+								{Math.floor(calculatedResult?.totalWithTruck).toLocaleString(
+									'ru-RU',
+								)}{' '}
+								₽
 							</strong>
 						</p>
 						<p className='mt-2'>
 							✅ Итоговая стоимость с доставкой фурой:{' '}
 							<strong>
-								{calculatedResult?.totalWithLorry.toLocaleString()} ₽
+								{Math.floor(calculatedResult?.totalWithLorry).toLocaleString(
+									'ru-RU',
+								)}{' '}
+								₽
 							</strong>
 						</p>
 					</div>
