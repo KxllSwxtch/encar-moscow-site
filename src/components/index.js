@@ -8,6 +8,7 @@ import CarInspection from './CarInspection'
 import CalculatorSection from './CalculatorSection'
 import Footer from './Footer'
 import PartnersSection from './PartnersSection'
+import KazakhstanCalculator from './KazakhstanCalculator'
 
 export {
 	Header,
@@ -20,4 +21,5 @@ export {
 	CalculatorSection,
 	Footer,
 	PartnersSection,
+	KazakhstanCalculator,
 }

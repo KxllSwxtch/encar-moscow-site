@@ -27,21 +27,29 @@ const CarCard = ({ car, usdKrwRate }) => {
 	const carPriceKrw = car?.FINISH
 	const carPriceUsd = Math.round(car?.FINISH / usdKrwRate)
 
+	const formattedModelName =
+		car?.MODEL_NAME === 'Canival'
+			? 'Carnival'
+			: car.MODEL_NAME?.replaceAll('_', ' ')
+
 	return (
-		<div className='p-4 rounded-[10px] bg-white shadow-md flex flex-col justify-between gap-5 transition-all duration-300 hover:shadow-lg'>
+		<div className='p-4 rounded-[10px] bg-white shadow-md flex flex-col justify-between gap-5 transition-all duration-300 hover:shadow-lg break-words'>
 			{/* Изображение автомобиля */}
 			<div className='aspect-[16/9] rounded-[5px] overflow-hidden relative'>
 				<img
-					src={firstImage}
-					alt={car.MODEL_NAME}
+					src={
+						firstImage ||
+						'https://res.cloudinary.com/pomegranitedesign/image/upload/v1743466165/EncarMoscow/placeholder.webp'
+					}
+					alt={car.MODEL_NAME || 'Placeholder'}
 					className='absolute left-0 top-0 w-full h-full object-cover'
 				/>
 			</div>
 
 			{/* Информация об автомобиле */}
 			<div className='px-2'>
-				<h3 className='text-xl font-bold text-gray-800 mb-2 text-center'>
-					{car.MARKA_NAME} {car.MODEL_NAME}
+				<h3 className='text-xl font-bold text-gray-800 mb-2 text-center break-words hyphens-auto'>
+					{car.MARKA_NAME?.replaceAll('_', ' ')} {formattedModelName}
 				</h3>
 				<div className='flex justify-between text-gray-500 text-sm border-b border-dotted border-gray-300 pb-1 mb-2'>
 					<span>Год</span>

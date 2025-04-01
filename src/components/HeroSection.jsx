@@ -50,6 +50,10 @@ const HeroSection = () => {
 		const query = new URLSearchParams()
 		if (filters.brand) query.set('brand', filters.brand)
 		if (selectedModel) query.set('model', selectedModel)
+		if (filters.yearFrom) query.set('yearFrom', filters.yearFrom)
+		if (filters.yearTo) query.set('yearTo', filters.yearTo)
+		if (filters.mileageFrom) query.set('mileageFrom', filters.mileageFrom)
+		if (filters.mileageTo) query.set('mileageTo', filters.mileageTo)
 
 		navigate(`/catalog?${query.toString()}`)
 	}
@@ -271,7 +275,7 @@ const HeroSection = () => {
 						animate={{ opacity: 1, y: 0 }}
 						transition={{ duration: 0.6, ease: 'easeOut', delay: 0.8 }}
 					>
-						<div className=''>
+						<div>
 							<BrandSelect
 								filters={filters}
 								handleFilterChange={handleFilterChange}
@@ -296,6 +300,101 @@ const HeroSection = () => {
 								classNamePrefix='react-select'
 								isSearchable={false}
 							/>
+
+							<div className='grid grid-cols-2 gap-4 mt-4'>
+								<Select
+									options={[
+										{ value: '', label: 'Год от' },
+										...Array.from({ length: 15 }, (_, i) => {
+											const year = `${2011 + i}`
+											return { value: year, label: year }
+										}).reverse(),
+									]}
+									value={
+										filters.yearFrom
+											? { value: filters.yearFrom, label: filters.yearFrom }
+											: { value: '', label: 'Год от' }
+									}
+									onChange={(option) =>
+										setFilters((prev) => ({ ...prev, yearFrom: option.value }))
+									}
+									className='text-black'
+									isSearchable={false}
+								/>
+								<Select
+									options={[
+										{ value: '', label: 'Год до' },
+										...Array.from({ length: 15 }, (_, i) => {
+											const year = `${2011 + i}`
+											return { value: year, label: year }
+										}).reverse(),
+									]}
+									value={
+										filters.yearTo
+											? { value: filters.yearTo, label: filters.yearTo }
+											: { value: '', label: 'Год до' }
+									}
+									onChange={(option) =>
+										setFilters((prev) => ({ ...prev, yearTo: option.value }))
+									}
+									className='text-black'
+									isSearchable={false}
+								/>
+							</div>
+
+							<div className='grid grid-cols-2 gap-4 mt-4'>
+								<Select
+									options={[
+										{ value: '', label: 'Пробег от' },
+										{ value: '0', label: '0 км' },
+										{ value: '20000', label: '20 000 км' },
+										{ value: '40000', label: '40 000 км' },
+										{ value: '60000', label: '60 000 км' },
+										{ value: '80000', label: '80 000 км' },
+										{ value: '100000', label: '100 000 км' },
+									]}
+									value={
+										filters.mileageFrom
+											? {
+													value: filters.mileageFrom,
+													label: `${filters.mileageFrom} км`,
+											  }
+											: { value: '', label: 'Пробег от' }
+									}
+									onChange={(option) =>
+										setFilters((prev) => ({
+											...prev,
+											mileageFrom: option.value,
+										}))
+									}
+									className='text-black'
+									isSearchable={false}
+								/>
+								<Select
+									options={[
+										{ value: '', label: 'Пробег до' },
+										{ value: '20000', label: '20 000 км' },
+										{ value: '40000', label: '40 000 км' },
+										{ value: '60000', label: '60 000 км' },
+										{ value: '80000', label: '80 000 км' },
+										{ value: '100000', label: '100 000 км' },
+										{ value: '150000', label: '150 000 км' },
+									]}
+									value={
+										filters.mileageTo
+											? {
+													value: filters.mileageTo,
+													label: `${filters.mileageTo} км`,
+											  }
+											: { value: '', label: 'Пробег до' }
+									}
+									onChange={(option) =>
+										setFilters((prev) => ({ ...prev, mileageTo: option.value }))
+									}
+									className='text-black'
+									isSearchable={false}
+								/>
+							</div>
 						</div>
 
 						<button
@@ -334,7 +433,7 @@ const HeroSection = () => {
 						<div className='relative w-full h-48 md:h-130'>
 							<iframe
 								className='w-full h-full rounded-md shadow-lg'
-								src={`https://www.youtube.com/embed/${latestVideoId}?rel=0&showinfo=0&autoplay=0&controls=0`}
+								src={`https://www.youtube.com/embed/${latestVideoId}?rel=0&showinfo=0&autoplay=1&controls=0`}
 								title='Последнее видео с Youtube канала KoreaExCar'
 								allow='autoplay; encrypted-media'
 								allowFullScreen

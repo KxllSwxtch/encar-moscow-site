@@ -28,30 +28,9 @@ const Catalog = () => {
 
 	const location = useLocation()
 
-	useEffect(() => {
-		const params = new URLSearchParams(location.search)
-		console.log(params)
-
-		const brandFromURL = params.get('brand')
-		const modelFromURL = params.get('model')
-
-		if (brandFromURL) {
-			fetchModels(brandFromURL).then(() => {
-				setFilters((prev) => ({
-					...prev,
-					brand: brandFromURL,
-					model: modelFromURL || '',
-				}))
-				fetchCars()
-			})
-		} else {
-			fetchCars()
-		}
-	}, [location.search])
-
 	// Опции с логотипами брендов
 	const brandOptions = [
-		{ value: '', label: 'Любая' },
+		{ value: '', label: 'Все' },
 		{ value: '1', label: 'Acura', logo: brandLogos.Acura },
 		{ value: '2', label: 'Alfaromeo', logo: brandLogos['Alfa Romeo'] },
 		{ value: '3', label: 'Aston Martin', logo: brandLogos['Aston Martin'] },
@@ -152,12 +131,12 @@ const Catalog = () => {
 	]
 
 	// Функция для получения данных с APIy
-	const fetchCars = async (pageNumber = 1) => {
+	const fetchCars = async (pageNumber = 1, customFilters = filters) => {
 		try {
 			setLoading(true)
 			const response = await axios.get(
 				`https://encar-moscow-proxy.onrender.com/api/proxy?url=${encodeURIComponent(
-					`https://api.darvin.digital/api.php?method=get_cars&marka_id=${filters.brand}&model_id=${filters.model}&year_from=${filters.yearFrom}&year_to=${filters.yearTo}&mileage_from=${filters.mileageFrom}&mileage_to=${filters.mileageTo}&engine_from=${filters.capacityFrom}&engine_to=${filters.capacityTo}&price_from=${filters.priceFrom}&price_to=${filters.priceTo}&sort=${sortOption}&page=${pageNumber}`,
+					`https://api.darvin.digital/api.php?method=get_cars&marka_id=${customFilters.brand}&model_id=${customFilters.model}&year_from=${customFilters.yearFrom}&year_to=${customFilters.yearTo}&mileage_from=${customFilters.mileageFrom}&mileage_to=${customFilters.mileageTo}&engine_from=${customFilters.capacityFrom}&engine_to=${customFilters.capacityTo}&price_from=${customFilters.priceFrom}&price_to=${customFilters.priceTo}&sort=${sortOption}&page=${pageNumber}`,
 				)}`,
 			)
 			const newCars = response.data
@@ -171,11 +150,11 @@ const Catalog = () => {
 	}
 
 	// Получаем общее кол-во автомобилей по поиску или без
-	const fetchTotalCars = async () => {
+	const fetchTotalCars = async (customFilters = filters) => {
 		try {
 			const response = await axios.get(
 				`https://encar-moscow-proxy.onrender.com/api/proxy?url=${encodeURIComponent(
-					`https://api.darvin.digital/api.php?method=get_cars_count&marka_id=${filters.brand}&model_id=${filters.model}&year_from=${filters.yearFrom}&year_to=${filters.yearTo}&mileage_from=${filters.mileageFrom}&mileage_to=${filters.mileageTo}&engine_from=${filters.capacityFrom}&engine_to=${filters.capacityTo}&price_from=${filters.priceFrom}&price_to=${filters.priceTo}&sort=${sortOption}`,
+					`https://api.darvin.digital/api.php?method=get_cars_count&marka_id=${customFilters.brand}&model_id=${customFilters.model}&year_from=${customFilters.yearFrom}&year_to=${customFilters.yearTo}&mileage_from=${customFilters.mileageFrom}&mileage_to=${customFilters.mileageTo}&engine_from=${customFilters.capacityFrom}&engine_to=${customFilters.capacityTo}&price_from=${customFilters.priceFrom}&price_to=${customFilters.priceTo}&sort=${sortOption}`,
 				)}`,
 			)
 
@@ -198,8 +177,37 @@ const Catalog = () => {
 
 	// Загрузка данных при первом рендере и при изменении номера страницы
 	useEffect(() => {
-		fetchCars(currentPage)
-		fetchTotalCars()
+		const params = new URLSearchParams(location.search)
+		const brandFromURL = params.get('brand')
+		const modelFromURL = params.get('model')
+		const yearFromURL = params.get('yearFrom')
+		const yearToURL = params.get('yearTo')
+		const mileageFromURL = params.get('mileageFrom')
+		const mileageToURL = params.get('mileageTo')
+
+		const newFilters = {
+			...filters,
+			brand: brandFromURL || '',
+			model: modelFromURL || '',
+			yearFrom: yearFromURL || '',
+			yearTo: yearToURL || '',
+			mileageFrom: mileageFromURL || '',
+			mileageTo: mileageToURL || '',
+		}
+
+		setFilters(newFilters)
+
+		if (brandFromURL) {
+			fetchModels(brandFromURL).then(() => {
+				fetchCars(currentPage, newFilters)
+				fetchTotalCars(newFilters)
+			})
+		} else {
+			fetchCars(currentPage, newFilters)
+			fetchTotalCars(newFilters)
+		}
+
+		window.history.replaceState({}, '')
 	}, [currentPage])
 
 	useEffect(() => {
@@ -212,9 +220,6 @@ const Catalog = () => {
 				if (response.status === 200) {
 					const jsonData = response.data
 					const rate = jsonData['usd']['krw']
-
-					console.log(rate)
-
 					setUsdKrwRate(rate)
 				}
 			} catch (e) {
@@ -574,10 +579,10 @@ const Catalog = () => {
 										name='model'
 										value={filters.model}
 										onChange={handleFilterChange}
-										className='w-full border p-2 rounded'
+										className='w-full border p-2 rounded disabled:bg-gray-200'
 										disabled={!filters.brand}
 									>
-										<option value=''>Любая</option>
+										<option value=''>Все</option>
 										{models.map((model, index) => (
 											<option key={index} value={model.MODEL_NAME}>
 												{model.MODEL_NAME}

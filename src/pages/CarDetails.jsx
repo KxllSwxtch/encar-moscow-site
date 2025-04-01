@@ -5,13 +5,13 @@ import { useParams } from 'react-router-dom'
 import { Swiper, SwiperSlide } from 'swiper/react'
 import { Navigation, Pagination } from 'swiper/modules'
 import { FaInstagram, FaWhatsapp } from 'react-icons/fa'
+import { doc, getDoc, setDoc, updateDoc, arrayUnion } from 'firebase/firestore'
 import 'swiper/css'
 import 'swiper/css/navigation'
 import 'swiper/css/pagination'
-import { Loader, CarInspection } from '../components'
+import { Loader, CarInspection, KazakhstanCalculator } from '../components'
 import { useAuth } from '../hooks/useAuth'
 import { db } from '../firebase'
-import { doc, getDoc, setDoc, updateDoc, arrayUnion } from 'firebase/firestore'
 
 const translations = {
 	price: 'Цена в Корее (₩)',
@@ -326,11 +326,17 @@ const CarDetails = () => {
 	const meanUsdtRubRate =
 		usdtRubRates?.reduce((a, b) => a + b, 0) / usdtRubRates?.length + 2
 
+	const carName = car?.category?.manufacturerEnglishName
+	const formattedCarName = carName?.replaceAll('_', ' ')
+
+	const modelGroup = car?.category?.modelGroupEnglishName
+	const formattedModelGroup = modelGroup === 'Canival' ? 'Carnival' : modelGroup
+
 	return (
-		<div className='container mx-auto mt-24 md:mt-30 p-6 bg-white shadow-lg rounded-lg'>
+		<div className='container mx-auto mt-24 md:mt-30 p-4 md:p-6 bg-white shadow-lg rounded-lg'>
 			<h1 className='text-3xl font-bold text-center mb-6'>
-				{car?.category?.manufacturerEnglishName}{' '}
-				{car?.category?.modelGroupEnglishName} {car?.category?.gradeEnglishName}
+				{formattedCarName} {formattedModelGroup}{' '}
+				{car?.category?.gradeEnglishName}
 			</h1>
 
 			{/* Слайдер с фото */}
@@ -464,6 +470,17 @@ const CarDetails = () => {
 					>
 						🇷🇺 Россия
 					</button>
+					<button
+						onClick={() => setSelectedCountry('kazakhstan')}
+						className={`px-6 py-3 rounded-lg shadow-md text-lg font-semibold transition duration-300 border-2 cursor-pointer
+				${
+					selectedCountry === 'kazakhstan'
+						? 'bg-green-700 text-white border-green-700'
+						: 'bg-white text-green-700 border-green-500 hover:bg-green-100'
+				}`}
+					>
+						🇰🇿 Казахстан
+					</button>
 				</div>
 			</div>
 
@@ -495,7 +512,7 @@ const CarDetails = () => {
 			)}
 
 			{calculatedResult && selectedCountry === 'russia' && (
-				<div className='mt-6 p-6 bg-white shadow-lg rounded-lg text-center border border-gray-200'>
+				<div className='mt-6 bg-white shadow-lg rounded-lg text-center border border-gray-200'>
 					<h2 className='text-2xl font-bold text-gray-900 mb-6'>
 						Расчёт стоимости под ключ
 					</h2>
@@ -570,6 +587,15 @@ const CarDetails = () => {
 						</p>
 					</div>
 				</div>
+			)}
+
+			{/* КЗ */}
+			{selectedCountry === 'kazakhstan' && (
+				<KazakhstanCalculator
+					usdKztRate={usdKztRate}
+					usdKrwRate={usdKrwRate}
+					carPriceKRW={carPriceKorea}
+				/>
 			)}
 
 			{errorCalc && <p className='text-center text-red-500'>{errorCalc}</p>}
