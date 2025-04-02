@@ -1,6 +1,6 @@
 import axios from 'axios'
 import * as cheerio from 'cheerio'
-import { useEffect, useState } from 'react'
+import { use, useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { Swiper, SwiperSlide } from 'swiper/react'
 import { Navigation, Pagination } from 'swiper/modules'
@@ -41,6 +41,7 @@ const translations = {
 	세금미납: 'Задолженность по налогам',
 	없음: 'Отсутствует',
 	제시번호: 'Номер предложения',
+	'가솔린+전기': 'Гибрид',
 }
 
 const colorTranslations = {
@@ -61,9 +62,11 @@ const colorTranslations = {
 	청록색: 'Бирюзовый',
 	기타: 'Другой',
 	쥐색: 'Тёмно-серый',
+	은회색: 'Серебристый',
 }
 
 const CarDetails = () => {
+	const [vehicleId, setVehicleId] = useState(null)
 	const [calculatedResultKZ, setCalculatedResultKZ] = useState(null)
 
 	const [usdKrwRate, setUsdKrwRate] = useState(null)
@@ -79,6 +82,7 @@ const CarDetails = () => {
 	const [loadingCalc, setLoadingCalc] = useState(false)
 	const [errorCalc, setErrorCalc] = useState('')
 	const [calculatedResult, setCalculatedResult] = useState(null)
+	const [drivetrain, setDrivetrain] = useState('')
 
 	const { carId } = useParams()
 	const { user } = useAuth() // Пользователь
@@ -92,6 +96,7 @@ const CarDetails = () => {
 				)
 
 				setCar(response.data)
+				setVehicleId(response?.data?.vehicleId)
 			} catch (err) {
 				setError('Ошибка при загрузке данных')
 				console.error(err)
@@ -102,6 +107,75 @@ const CarDetails = () => {
 
 		if (carId) fetchCar()
 	}, [carId])
+
+	useEffect(() => {
+		if (!vehicleId) return
+
+		const fetchInspectionData = async () => {
+			try {
+				const gradeDrive = car?.category?.gradeEnglishName?.toUpperCase()
+				if (gradeDrive?.includes('2WD')) {
+					setDrivetrain('2WD')
+					return
+				}
+				if (gradeDrive?.includes('4WD') || gradeDrive?.includes('AWD')) {
+					setDrivetrain('AWD / 4WD')
+					return
+				}
+				if (gradeDrive?.includes('RWD')) {
+					setDrivetrain('RWD')
+					return
+				}
+				const response = await axios.get(
+					`https://api.encar.com/v1/readside/inspection/vehicle/${vehicleId}`,
+				)
+
+				const data = response?.data
+				if (!data?.inners) {
+					setDrivetrain('')
+					return
+				}
+
+				const powertrain = data.inners.find(
+					(item) =>
+						item.type?.code === 'S03' && item.type?.title === '동력전달',
+				)
+
+				if (!powertrain || !powertrain.children) {
+					setDrivetrain('')
+					return
+				}
+
+				const drivetrainText = powertrain?.children?.find(
+					(c) =>
+						typeof c.description === 'string' && c.description.includes('WD'),
+				)?.description
+				const titles = powertrain.children.map((c) => c.type?.title)
+				const hasDifferential = titles.includes('디피렌셜 기어')
+				const hasCVJoint = titles.includes('등속조인트')
+				const hasDriveShaft = titles.includes('추친축 및 베어링')
+
+				if (drivetrainText) {
+					setDrivetrain(drivetrainText)
+				} else if (hasDifferential && hasCVJoint && hasDriveShaft) {
+					setDrivetrain('AWD / 4WD')
+				} else if (hasDifferential && (hasDriveShaft || hasCVJoint)) {
+					setDrivetrain('RWD')
+				} else if (!hasDifferential && hasCVJoint) {
+					setDrivetrain('FWD')
+				} else {
+					setDrivetrain('2WD')
+				}
+			} catch (e) {
+				console.warn(
+					'Inspection fetch failed or empty, fallback to empty drivetrain.',
+				)
+				setDrivetrain('')
+			}
+		}
+
+		fetchInspectionData()
+	}, [vehicleId])
 
 	useEffect(() => {
 		const fetchUsdKrwRate = async () => {
@@ -401,11 +475,18 @@ const CarDetails = () => {
 					<strong>Трансмиссия:</strong>{' '}
 					{translations[car?.spec?.transmissionName]}
 				</p>
+				{drivetrain && (
+					<p className='text-gray-600'>
+						<strong>Привод:</strong> {drivetrain}
+					</p>
+				)}
 				<p className='text-gray-600'>
-					<strong>Тип топлива:</strong> {translations[car?.spec?.fuelName]}
+					<strong>Тип топлива:</strong>{' '}
+					{translations[car?.spec?.fuelName] || car?.spec?.fuelName}
 				</p>
 				<p className='text-gray-600'>
-					<strong>Цвет:</strong> {colorTranslations[car?.spec?.colorName]}
+					<strong>Цвет:</strong>{' '}
+					{colorTranslations[car?.spec?.colorName] || car?.spec?.colorName}
 				</p>
 				<>
 					<CarInspection car={car} />
