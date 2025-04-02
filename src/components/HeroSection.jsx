@@ -249,7 +249,7 @@ const HeroSection = () => {
 						transition={{ duration: 0.6, ease: 'easeOut', delay: 0.2 }}
 					>
 						Автомобили из <br /> Южной Кореи под ключ <br />
-						<span className='text-red-500'>без посредников</span>
+						<span className='text-red-500'>Выгода до 30%</span>
 					</motion.h1>
 
 					<motion.ul
