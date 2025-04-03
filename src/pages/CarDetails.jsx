@@ -726,7 +726,7 @@ const CarDetails = () => {
 			{errorCalc && <p className='text-center text-red-500'>{errorCalc}</p>}
 
 			<a
-				href='https://wa.me/821032728558'
+				href='https://wa.me/821099802858'
 				target='_blank'
 				rel='noopener noreferrer'
 				className='fixed bottom-6 right-6 bg-green-500 hover:bg-green-600 text-white px-6 py-3 rounded-full shadow-lg text-lg font-semibold z-50 transition duration-300 animate-bounce'
