@@ -298,10 +298,7 @@ const CarDetails = () => {
 				'https://calcus.ru/calculate/Customs',
 				new URLSearchParams({
 					owner: 1,
-					age: calculateAge(
-						car?.category?.formYear,
-						car?.category?.yearMonth?.substring(4, 6),
-					),
+					age: calculateAge(parseInt(car?.category?.formYear)),
 					engine: car?.spec?.fuelName === '가솔린' ? 1 : 2,
 					power: 1,
 					power_unit: 1,
@@ -316,6 +313,17 @@ const CarDetails = () => {
 					},
 				},
 			)
+
+			console.log({
+				owner: 1,
+				age: calculateAge(parseInt(car?.category?.formYear)),
+				engine: car?.spec?.fuelName === '가솔린' ? 1 : 2,
+				power: 1,
+				power_unit: 1,
+				value: car?.spec?.displacement,
+				price: car?.advertisement?.price * 10000,
+				curr: 'KRW',
+			})
 
 			if (!response.status === 200) throw new Error('Ошибка при расчёте')
 
@@ -363,19 +371,33 @@ const CarDetails = () => {
 		}
 	}
 
-	const calculateAge = (year, month) => {
+	const calculateAge = (year) => {
+		// Текущая дата
 		const currentDate = new Date()
-		const carDate = new Date(year, month - 1, 1)
+		const currentYear = currentDate.getFullYear()
 
-		const ageInMonths =
-			(currentDate.getFullYear() - carDate.getFullYear()) * 12 +
-			(currentDate.getMonth() - carDate.getMonth())
+		// Преобразуем в числа
+		const yearInt = parseInt(year)
 
-		if (ageInMonths < 36) {
+		// Расчет возраста в годах
+		const ageInYears = currentYear - yearInt
+
+		// Для таможенного расчета важно количество полных лет
+		// 2021 год в 2024 - это 3 года, то есть категория "3-5"
+		console.log(
+			'Год авто:',
+			yearInt,
+			'Текущий год:',
+			currentYear,
+			'Возраст в годах:',
+			ageInYears,
+		)
+
+		if (ageInYears < 3) {
 			return '0-3'
-		} else if (ageInMonths < 60) {
+		} else if (ageInYears >= 3 && ageInYears < 5) {
 			return '3-5'
-		} else if (ageInMonths < 84) {
+		} else if (ageInYears >= 5 && ageInYears < 7) {
 			return '5-7'
 		} else {
 			return '7-0'
