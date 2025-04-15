@@ -548,13 +548,32 @@ const CarDetails = () => {
 						</a>
 					</p>
 					<p className='text-gray-700 mb-2'>
+						<strong>Виктор:</strong>{' '}
+						<a
+							href='tel:821099802858'
+							className='text-blue-600 hover:underline'
+						>
+							+82 10-9980-2858
+						</a>
+					</p>
+					<p className='text-gray-700 mb-2'>
 						<a
 							target='_blank'
 							href='https://wa.me/821032728558'
 							className='text-blue-600 hover:underline flex justify-center items-center'
 						>
 							<FaWhatsapp className='text-green-600 text-xl mr-1' />
-							WhatsApp
+							WhatsApp (Вячеслав)
+						</a>
+					</p>
+					<p className='text-gray-700 mb-2'>
+						<a
+							target='_blank'
+							href='https://wa.me/821099802858'
+							className='text-blue-600 hover:underline flex justify-center items-center'
+						>
+							<FaWhatsapp className='text-green-600 text-xl mr-1' />
+							WhatsApp (Виктор)
 						</a>
 					</p>
 					<p className='text-gray-700 mb-2'>

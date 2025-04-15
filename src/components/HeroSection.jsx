@@ -1,62 +1,29 @@
 import { useState, useEffect } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
-import Select from 'react-select'
+import { AnimatePresence, motion } from 'framer-motion'
 import { useNavigate } from 'react-router-dom'
 import { Link } from 'react-router-dom'
+import axios from 'axios'
 import CalculatorSection from './CalculatorSection'
-import { brandLogos } from '../utils'
+import { translations, translateSmartly } from '../translations'
 
 const HeroSection = () => {
-	// Для фильтров
-	const [selectedModel, setSelectedModel] = useState('')
-	const [models, setModels] = useState([])
-	const [filters, setFilters] = useState({
-		brand: '',
-		model: '',
-		yearFrom: '',
-		yearTo: '',
-		mileageFrom: '',
-		mileageTo: '',
-		capacityFrom: '',
-		capacityTo: '',
-		priceFrom: '',
-		priceTo: '',
-	})
-
 	const [isModalOpen, setIsModalOpen] = useState(false)
 	const [name, setName] = useState('')
 	const [phone, setPhone] = useState('')
 	const [message, setMessage] = useState('')
 	const [latestVideoId, setLatestVideoId] = useState(null)
 
+	// Состояния для выбора автомобиля
+	const [manufacturers, setManufacturers] = useState(null)
+	const [selectedManufacturer, setSelectedManufacturer] = useState('')
+
+	const [modelGroups, setModelGroups] = useState(null)
+	const [selectedModelGroup, setSelectedModelGroup] = useState('')
+
+	const [models, setModels] = useState(null)
+	const [selectedModel, setSelectedModel] = useState('')
+
 	const navigate = useNavigate()
-
-	// Загружаем марки
-	const fetchModels = async (brandId) => {
-		try {
-			const response = await fetch(
-				`https://encar-moscow-proxy.onrender.com/api/proxy?url=${encodeURIComponent(
-					`https://api.darvin.digital/api.php?method=get_model&marka_id=${brandId}`,
-				)}`,
-			)
-			const data = await response.json()
-			setModels(data)
-		} catch (error) {
-			console.error('Ошибка загрузки моделей:', error)
-		}
-	}
-
-	const handleSearch = () => {
-		const query = new URLSearchParams()
-		if (filters.brand) query.set('brand', filters.brand)
-		if (selectedModel) query.set('model', selectedModel)
-		if (filters.yearFrom) query.set('yearFrom', filters.yearFrom)
-		if (filters.yearTo) query.set('yearTo', filters.yearTo)
-		if (filters.mileageFrom) query.set('mileageFrom', filters.mileageFrom)
-		if (filters.mileageTo) query.set('mileageTo', filters.mileageTo)
-
-		navigate(`/catalog?${query.toString()}`)
-	}
 
 	const openModal = () => setIsModalOpen(true)
 	const closeModal = () => setIsModalOpen(false)
@@ -70,6 +37,29 @@ const HeroSection = () => {
 
 		// Открытие WhatsApp в новой вкладке
 		window.open(whatsappUrl, '_blank')
+	}
+
+	// Функция для перехода в каталог с выбранными параметрами
+	const handleSearchCars = () => {
+		const searchParams = new URLSearchParams()
+
+		if (selectedManufacturer) {
+			searchParams.append('manufacturer', selectedManufacturer)
+		}
+
+		if (selectedModelGroup) {
+			searchParams.append('modelGroup', selectedModelGroup)
+		}
+
+		if (selectedModel) {
+			searchParams.append('model', selectedModel)
+		}
+
+		if (searchParams.toString()) {
+			navigate(`/catalog?${searchParams.toString()}`)
+		} else {
+			navigate('/catalog')
+		}
 	}
 
 	useEffect(() => {
@@ -92,141 +82,98 @@ const HeroSection = () => {
 		fetchLatestVideo()
 	}, [])
 
-	// Загружаем модели после выбора марки
+	// Загружаем список производителей
 	useEffect(() => {
-		if (filters.brand) {
-			fetchModels(filters.brand)
-		} else {
-			setModels([])
-			setSelectedModel('')
-		}
-	}, [filters.brand])
+		const fetchManufacturers = async () => {
+			const url = `https://api.encar.com/search/car/list/general?count=true&q=(And.Hidden.N._.SellType.%EC%9D%BC%EB%B0%98._.CarType.A.)&inav=%7CMetadata%7CSort`
 
-	const brandOptions = [
-		{ value: '', label: 'Марка' },
-		{ value: '1', label: 'Acura', logo: brandLogos.Acura },
-		{ value: '2', label: 'Alfaromeo', logo: brandLogos['Alfa Romeo'] },
-		{ value: '3', label: 'Aston Martin', logo: brandLogos['Aston Martin'] },
-		{ value: '4', label: 'Audi', logo: brandLogos.Audi },
-		{ value: '5', label: 'Baic Yinxiang', logo: brandLogos.Buick },
-		{ value: '6', label: 'Bentley', logo: brandLogos.Bentley },
-		{ value: '7', label: 'BMW', logo: brandLogos.BMW },
-		{ value: '8', label: 'Cadillac', logo: brandLogos.Cadillac },
-		{ value: '9', label: 'Chevrolet', logo: brandLogos.Chevrolet },
-		{
-			value: '10',
-			label: 'Chevrolet GM Daewoo',
-			logo: brandLogos['Chevrolet (Korea)'],
-		},
-		{ value: '11', label: 'Chrysler', logo: brandLogos.Chrysler },
-		{ value: '12', label: 'Citroen', logo: brandLogos.Citroën },
-		{ value: '13', label: 'Daihatsu', logo: brandLogos.Daihatsu },
-		{ value: '14', label: 'DFSK', logo: '' },
-		{ value: '15', label: 'Dodge', logo: brandLogos.Dodge },
-		{ value: '16', label: 'etc', logo: '' },
-		{ value: '17', label: 'Ferrari', logo: brandLogos.Ferrari },
-		{ value: '18', label: 'Fiat', logo: brandLogos.Fiat },
-		{ value: '19', label: 'Ford', logo: brandLogos.Ford },
-		{ value: '20', label: 'Genesis', logo: brandLogos.Genesis },
-		{ value: '21', label: 'GMC', logo: brandLogos.GMC },
-		{ value: '22', label: 'Honda', logo: brandLogos.Honda },
-		{ value: '23', label: 'Hummer', logo: brandLogos.Hummer },
-		{ value: '24', label: 'Hyundai', logo: brandLogos.Hyundai },
-		{ value: '25', label: 'Infiniti', logo: brandLogos.Infiniti },
-		{ value: '26', label: 'Jaguar', logo: brandLogos.Jaguar },
-		{ value: '27', label: 'Jeep', logo: brandLogos.Jeep },
-		{
-			value: '28',
-			label: 'KG Mobility Ssangyong',
-			logo: brandLogos['KG Mobility (SsangYong)'],
-		},
-		{ value: '29', label: 'Kia', logo: brandLogos.KIA },
-		{ value: '30', label: 'Lamborghini', logo: brandLogos.Lamborghini },
-		{ value: '31', label: 'Land Rover', logo: brandLogos['Land Rover'] },
-		{ value: '32', label: 'Lexus', logo: brandLogos.Lexus },
-		{ value: '33', label: 'Lincoln', logo: brandLogos.Lincoln },
-		{ value: '34', label: 'Lotus', logo: brandLogos.Lotus },
-		{ value: '35', label: 'Maserati', logo: brandLogos.Maserati },
-		{ value: '36', label: 'Maybach', logo: brandLogos.Maybach },
-		{ value: '37', label: 'Mazda', logo: brandLogos.Mazda },
-		{ value: '38', label: 'McLaren', logo: brandLogos.McLaren },
-		{ value: '39', label: 'Mercedes-Benz', logo: brandLogos['Mercedes-Benz'] },
-		{ value: '40', label: 'Mercury', logo: '' },
-		{ value: '41', label: 'Mini', logo: brandLogos.Mini },
-		{ value: '42', label: 'Mitsubishi', logo: brandLogos.Mitsubishi },
-		{ value: '43', label: 'Mitsuoka', logo: brandLogos.Mitsuoka },
-		{ value: '44', label: 'Nissan', logo: brandLogos.Nissan },
-		{ value: '45', label: 'Others', logo: '' },
-		{ value: '46', label: 'Peugeot', logo: brandLogos.Peugeot },
-		{ value: '47', label: 'Polestar', logo: brandLogos.Polestar },
-		{ value: '48', label: 'Porsche', logo: brandLogos.Porsche },
-		{ value: '49', label: 'Renault-Korea Samsung', logo: brandLogos.Renault },
-		{ value: '50', label: 'Rolls-Royce', logo: brandLogos['Rolls-Royce'] },
-		{ value: '51', label: 'Saab', logo: brandLogos.SAAB },
-		{ value: '52', label: 'Scion', logo: brandLogos.Scion },
-		{ value: '53', label: 'Smart', logo: brandLogos.Smart },
-		{ value: '54', label: 'Subaru', logo: brandLogos.Subaru },
-		{ value: '55', label: 'Suzuki', logo: brandLogos.Suzuki },
-		{ value: '56', label: 'Tesla', logo: brandLogos.Tesla },
-		{ value: '57', label: 'Toyota', logo: brandLogos.Toyota },
-		{ value: '58', label: 'Volkswagen', logo: brandLogos.Volkswagen },
-		{ value: '59', label: 'Volvo', logo: brandLogos.Volvo },
-	]
+			try {
+				const response = await axios.get(url)
+				const data = response.data
 
-	const handleFilterChange = (e) => {
-		const { name, value } = e.target
-		setFilters((prevFilters) => ({
-			...prevFilters,
-			[name]: value,
-		}))
+				// data -> iNav -> Nodes[2] -> Nodes[2]?.Facets -> Nodes[2]?.Facets[0]?.Refinements?.Nodes[0]?.Facets
+				const manufacturersList =
+					data?.iNav?.Nodes[2]?.Facets[0]?.Refinements?.Nodes[0]?.Facets
 
-		// Если выбрана марка, подгружаем модели
-		if (name === 'brand') {
-			if (value) {
-				fetchModels(value)
-			} else {
-				setModels([])
-				setFilters((prevFilters) => ({
-					...prevFilters,
-					model: '',
-				}))
+				setManufacturers(manufacturersList)
+			} catch (error) {
+				console.error('Ошибка при загрузке производителей:', error)
 			}
 		}
-	}
 
-	// @ts-ignore
-	const BrandSelect = ({ filters, handleFilterChange }) => {
-		const handleChange = (selectedOption) => {
-			handleFilterChange({
-				target: {
-					name: 'brand',
-					value: selectedOption.value,
-				},
-			})
+		fetchManufacturers()
+	}, [])
+
+	// Загружаем модели
+	useEffect(() => {
+		const fetchModelGroups = async () => {
+			if (!selectedManufacturer) {
+				setModelGroups(null)
+				setSelectedModelGroup('')
+				return
+			}
+
+			const url = `https://api.encar.com/search/car/list/general?count=true&q=(And.Hidden.N._.SellType.%EC%9D%BC%EB%B0%98._.(C.CarType.A._.Manufacturer.${selectedManufacturer}.))&inav=%7CMetadata%7CSort`
+
+			try {
+				const response = await axios.get(url)
+				const data = response?.data
+
+				// data?.iNav?.Nodes[2]?.Facets[0]?.Refinements?.Nodes[0]?.Facets
+				const allManufacturers =
+					data?.iNav?.Nodes[2]?.Facets[0]?.Refinements?.Nodes[0]?.Facets
+
+				const filteredManufacturer = allManufacturers.filter(
+					(item) => item.IsSelected === true,
+				)[0]
+
+				const models = filteredManufacturer?.Refinements?.Nodes[0]?.Facets
+
+				setModelGroups(models)
+			} catch (error) {
+				console.error('Ошибка при загрузке моделей:', error)
+			}
 		}
 
-		return (
-			<div>
-				{/* <label className='block text-white font-semibold mb-2'>Марка</label> */}
-				<Select
-					options={brandOptions}
-					value={brandOptions.find((opt) => opt.value === filters.brand)}
-					onChange={handleChange}
-					getOptionLabel={(e) => (
-						<div className='flex items-center text-black'>
-							{e.logo && (
-								<img src={e.logo} alt={e.label} className='w-5 mr-2' />
-							)}
-							<span>{e.label}</span>
-						</div>
-					)}
-					// components={{ SingleValue: customSingleValue, Option: customOption }}
-					className='w-full'
-					isSearchable={false} // 🔥 Отключает возможность ввода текста
-				/>
-			</div>
-		)
-	}
+		fetchModelGroups()
+	}, [selectedManufacturer])
+
+	// Загружаем поколения
+	useEffect(() => {
+		const fetchModels = async () => {
+			if (!selectedModelGroup || !selectedManufacturer) {
+				setModels(null)
+				setSelectedModel('')
+				return
+			}
+
+			const url = `https://api.encar.com/search/car/list/general?count=true&q=(And.Hidden.N._.SellType.%EC%9D%BC%EB%B0%98._.(C.CarType.A._.(C.Manufacturer.${selectedManufacturer}._.ModelGroup.${selectedModelGroup}.)))&inav=%7CMetadata%7CSort`
+
+			try {
+				const response = await axios.get(url)
+				const data = response?.data
+
+				const allManufacturers =
+					data?.iNav?.Nodes[2]?.Facets[0]?.Refinements?.Nodes[0]?.Facets
+
+				const filteredManufacturer = allManufacturers.filter(
+					(item) => item.IsSelected === true,
+				)[0]
+
+				const modelGroup = filteredManufacturer?.Refinements?.Nodes[0]?.Facets
+				const filteredModel = modelGroup.filter(
+					(item) => item.IsSelected === true,
+				)[0]
+				const modelsList = filteredModel?.Refinements?.Nodes[0]?.Facets
+
+				setModels(modelsList)
+			} catch (error) {
+				console.error('Ошибка при загрузке поколений:', error)
+			}
+		}
+
+		fetchModels()
+	}, [selectedManufacturer, selectedModelGroup])
 
 	return (
 		<section
@@ -269,162 +216,104 @@ const HeroSection = () => {
 						</li>
 					</motion.ul>
 
-					<motion.div
-						className='grid md:grid-cols-1 grid-cols-1 gap-4 md:w-[60%] bg-white bg-opacity-90 p-5 rounded-lg shadow-lg'
-						initial={{ opacity: 0, y: 40 }}
-						animate={{ opacity: 1, y: 0 }}
-						transition={{ duration: 0.6, ease: 'easeOut', delay: 0.8 }}
-					>
-						<div>
-							<BrandSelect
-								filters={filters}
-								handleFilterChange={handleFilterChange}
-							/>
+					{/* Форма поиска автомобиля */}
+					<div className='bg-white/10 backdrop-blur-sm p-4 rounded-lg border border-white/20'>
+						<h3 className='text-xl font-semibold mb-3 text-center'>
+							Подобрать автомобиль
+						</h3>
+						<div className='grid grid-cols-1 md:grid-cols-3 gap-3'>
+							<select
+								className='w-full bg-white border border-gray-300 rounded-md px-3 py-2 text-gray-800 appearance-none shadow-sm focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all duration-200'
+								value={selectedManufacturer}
+								onChange={(e) => setSelectedManufacturer(e.target.value)}
+								style={{
+									backgroundImage:
+										'url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 fill=%22none%22 viewBox=%220 0 24 24%22 stroke=%22%23666%22%3E%3Cpath stroke-linecap=%22round%22 stroke-linejoin=%22round%22 stroke-width=%222%22 d=%22M19 9l-7 7-7-7%22%3E%3C/path%3E%3C/svg%3E")',
+									backgroundRepeat: 'no-repeat',
+									backgroundPosition: 'right 0.5rem center',
+									backgroundSize: '1.5em 1.5em',
+									paddingRight: '2.5rem',
+								}}
+							>
+								<option value=''>Выберите марку</option>
+								{manufacturers
+									?.filter((manufacturer) => manufacturer.Count > 0)
+									.map((manufacturer, index) => (
+										<option key={index} value={manufacturer.Value}>
+											{translateSmartly(manufacturer.Value)}
+										</option>
+									))}
+							</select>
 
-							<Select
-								options={[
-									{ value: '', label: 'Выберите модель' },
-									...models.map((model) => ({
-										value: model.MODEL_NAME,
-										label: model.MODEL_NAME,
-									})),
-								]}
-								value={
-									selectedModel
-										? { value: selectedModel, label: selectedModel }
-										: { value: '', label: 'Выберите модель' }
-								}
-								onChange={(option) => setSelectedModel(option.value)}
-								isDisabled={!filters.brand}
-								className='text-black mt-4'
-								classNamePrefix='react-select'
-								isSearchable={false}
-							/>
+							<select
+								disabled={!selectedManufacturer}
+								className='w-full bg-white border border-gray-300 rounded-md px-3 py-2 text-gray-800 appearance-none shadow-sm focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all duration-200 disabled:bg-gray-200 disabled:opacity-70'
+								value={selectedModelGroup}
+								onChange={(e) => setSelectedModelGroup(e.target.value)}
+								style={{
+									backgroundImage:
+										'url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 fill=%22none%22 viewBox=%220 0 24 24%22 stroke=%22%23666%22%3E%3Cpath stroke-linecap=%22round%22 stroke-linejoin=%22round%22 stroke-width=%222%22 d=%22M19 9l-7 7-7-7%22%3E%3C/path%3E%3C/svg%3E")',
+									backgroundRepeat: 'no-repeat',
+									backgroundPosition: 'right 0.5rem center',
+									backgroundSize: '1.5em 1.5em',
+									paddingRight: '2.5rem',
+								}}
+							>
+								<option value=''>Выберите модель</option>
+								{modelGroups
+									?.filter((modelGroup) => modelGroup.Count > 0)
+									.map((modelGroup, index) => (
+										<option key={index} value={modelGroup.Value}>
+											{translateSmartly(modelGroup.Value)}
+										</option>
+									))}
+							</select>
 
-							<div className='grid grid-cols-2 gap-4 mt-4'>
-								<Select
-									options={[
-										{ value: '', label: 'Год от' },
-										...Array.from({ length: 15 }, (_, i) => {
-											const year = `${2011 + i}`
-											return { value: year, label: year }
-										}).reverse(),
-									]}
-									value={
-										filters.yearFrom
-											? { value: filters.yearFrom, label: filters.yearFrom }
-											: { value: '', label: 'Год от' }
-									}
-									onChange={(option) =>
-										setFilters((prev) => ({ ...prev, yearFrom: option.value }))
-									}
-									className='text-black'
-									isSearchable={false}
-								/>
-								<Select
-									options={[
-										{ value: '', label: 'Год до' },
-										...Array.from({ length: 15 }, (_, i) => {
-											const year = `${2011 + i}`
-											return { value: year, label: year }
-										}).reverse(),
-									]}
-									value={
-										filters.yearTo
-											? { value: filters.yearTo, label: filters.yearTo }
-											: { value: '', label: 'Год до' }
-									}
-									onChange={(option) =>
-										setFilters((prev) => ({ ...prev, yearTo: option.value }))
-									}
-									className='text-black'
-									isSearchable={false}
-								/>
-							</div>
-
-							<div className='grid grid-cols-2 gap-4 mt-4'>
-								<Select
-									options={[
-										{ value: '', label: 'Пробег от' },
-										{ value: '0', label: '0 км' },
-										{ value: '20000', label: '20 000 км' },
-										{ value: '40000', label: '40 000 км' },
-										{ value: '60000', label: '60 000 км' },
-										{ value: '80000', label: '80 000 км' },
-										{ value: '100000', label: '100 000 км' },
-									]}
-									value={
-										filters.mileageFrom
-											? {
-													value: filters.mileageFrom,
-													label: `${filters.mileageFrom} км`,
-											  }
-											: { value: '', label: 'Пробег от' }
-									}
-									onChange={(option) =>
-										setFilters((prev) => ({
-											...prev,
-											mileageFrom: option.value,
-										}))
-									}
-									className='text-black'
-									isSearchable={false}
-								/>
-								<Select
-									options={[
-										{ value: '', label: 'Пробег до' },
-										{ value: '20000', label: '20 000 км' },
-										{ value: '40000', label: '40 000 км' },
-										{ value: '60000', label: '60 000 км' },
-										{ value: '80000', label: '80 000 км' },
-										{ value: '100000', label: '100 000 км' },
-										{ value: '150000', label: '150 000 км' },
-									]}
-									value={
-										filters.mileageTo
-											? {
-													value: filters.mileageTo,
-													label: `${filters.mileageTo} км`,
-											  }
-											: { value: '', label: 'Пробег до' }
-									}
-									onChange={(option) =>
-										setFilters((prev) => ({ ...prev, mileageTo: option.value }))
-									}
-									className='text-black'
-									isSearchable={false}
-								/>
-							</div>
+							<select
+								disabled={!selectedModelGroup}
+								className='w-full bg-white border border-gray-300 rounded-md px-3 py-2 text-gray-800 appearance-none shadow-sm focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all duration-200 disabled:bg-gray-200 disabled:opacity-70'
+								value={selectedModel}
+								onChange={(e) => setSelectedModel(e.target.value)}
+								style={{
+									backgroundImage:
+										'url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 fill=%22none%22 viewBox=%220 0 24 24%22 stroke=%22%23666%22%3E%3Cpath stroke-linecap=%22round%22 stroke-linejoin=%22round%22 stroke-width=%222%22 d=%22M19 9l-7 7-7-7%22%3E%3C/path%3E%3C/svg%3E")',
+									backgroundRepeat: 'no-repeat',
+									backgroundPosition: 'right 0.5rem center',
+									backgroundSize: '1.5em 1.5em',
+									paddingRight: '2.5rem',
+								}}
+							>
+								<option value=''>Выберите поколение</option>
+								{models
+									?.filter((model) => model.Count > 0)
+									.map((model, index) => (
+										<option key={index} value={model.Value}>
+											{translations[model.Value] ||
+												translateSmartly(model.Value) ||
+												model.Value}
+										</option>
+									))}
+							</select>
 						</div>
 
-						<button
-							onClick={() => handleSearch()}
-							className='bg-red-600 hover:bg-red-700 text-white py-3 px-6 font-semibold rounded-md shadow-md transition duration-300 w-full cursor-pointer col-span-2'
-						>
-							🔍 Искать автомобили
-						</button>
-					</motion.div>
+						<div className='mt-3'>
+							<button
+								onClick={handleSearchCars}
+								className='bg-red-600 hover:bg-red-800 text-white py-2 px-6 w-full font-semibold rounded-md transition-colors duration-300 text-center cursor-pointer'
+							>
+								Поиск автомобилей
+							</button>
+						</div>
+					</div>
 
-					<motion.div
-						className='md:flex md:space-x-4 grid grid-cols-1 gap-2'
-						initial={{ opacity: 0, y: 40 }}
-						animate={{ opacity: 1, y: 0 }}
-						transition={{ duration: 0.6, ease: 'easeOut', delay: 0.6 }}
-					>
+					<div className='md:flex md:space-x-4 grid grid-cols-1 gap-2'>
 						<button
 							onClick={openModal}
 							className='bg-red-600 hover:bg-red-800 text-white py-3 px-6 text-lg font-semibold rounded-md transition-colors duration-300 text-center cursor-pointer'
 						>
 							Рассчитать стоимость
 						</button>
-						{/* <Link
-							to='/catalog'
-							rel='noopener noreferrer'
-							className='bg-white text-red-600 hover:text-red-800 py-3 px-6 text-lg font-semibold rounded-md border border-red-600 hover:border-red-800 transition-colors duration-300 text-center'
-						>
-							Смотреть каталог автомобилей
-						</Link> */}
-					</motion.div>
+					</div>
 				</div>
 
 				{/* Видео (YouTube Embed) */}

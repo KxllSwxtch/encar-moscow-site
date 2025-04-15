@@ -1,214 +1,159 @@
-import { useEffect, useState } from 'react'
-import Select from 'react-select'
-import { useLocation } from 'react-router-dom'
 import axios from 'axios'
+import { useState, useEffect, useRef } from 'react'
+import { useLocation, useNavigate } from 'react-router-dom'
+import { translations, translateSmartly } from '../translations'
+import { formatDate, transformBadgeValue } from '../utils'
 import { CarCard, Loader } from '../components'
-import { brandLogos } from '../utils'
 
 const Catalog = () => {
-	const [sortOption, setSortOption] = useState('') // Сортировка
-	const [usdKrwRate, setUsdKrwRate] = useState(null)
-	const [cars, setCars] = useState([])
-	const [loading, setLoading] = useState(true)
-	const [currentPage, setCurrentPage] = useState(1)
-	const [totalPages, setTotalPages] = useState(5) // Предположим, что всего 5 страниц
-	const [models, setModels] = useState([])
-	const [filters, setFilters] = useState({
-		brand: '',
-		model: '',
-		yearFrom: '',
-		yearTo: '',
-		mileageFrom: '',
-		mileageTo: '',
-		capacityFrom: '',
-		capacityTo: '',
-		priceFrom: '',
-		priceTo: '',
+	const location = useLocation()
+	const navigate = useNavigate()
+	const filtersReady = useRef(false)
+	const urlParams = useRef({
+		manufacturer: null,
+		modelGroup: null,
+		model: null,
 	})
 
-	const location = useLocation()
+	const [sortOption, setSortOption] = useState('newest')
 
-	// Опции с логотипами брендов
-	const brandOptions = [
-		{ value: '', label: 'Все' },
-		{ value: '1', label: 'Acura', logo: brandLogos.Acura },
-		{ value: '2', label: 'Alfaromeo', logo: brandLogos['Alfa Romeo'] },
-		{ value: '3', label: 'Aston Martin', logo: brandLogos['Aston Martin'] },
-		{ value: '4', label: 'Audi', logo: brandLogos.Audi },
-		{ value: '5', label: 'Baic Yinxiang', logo: brandLogos.Buick },
-		{ value: '6', label: 'Bentley', logo: brandLogos.Bentley },
-		{ value: '7', label: 'BMW', logo: brandLogos.BMW },
-		{ value: '8', label: 'Cadillac', logo: brandLogos.Cadillac },
-		{ value: '9', label: 'Chevrolet', logo: brandLogos.Chevrolet },
-		{
-			value: '10',
-			label: 'Chevrolet GM Daewoo',
-			logo: brandLogos['Chevrolet (Korea)'],
-		},
-		{ value: '11', label: 'Chrysler', logo: brandLogos.Chrysler },
-		{ value: '12', label: 'Citroen', logo: brandLogos.Citroën },
-		{ value: '13', label: 'Daihatsu', logo: brandLogos.Daihatsu },
-		{ value: '14', label: 'DFSK', logo: '' },
-		{ value: '15', label: 'Dodge', logo: brandLogos.Dodge },
-		{ value: '16', label: 'etc', logo: '' },
-		{ value: '17', label: 'Ferrari', logo: brandLogos.Ferrari },
-		{ value: '18', label: 'Fiat', logo: brandLogos.Fiat },
-		{ value: '19', label: 'Ford', logo: brandLogos.Ford },
-		{ value: '20', label: 'Genesis', logo: brandLogos.Genesis },
-		{ value: '21', label: 'GMC', logo: brandLogos.GMC },
-		{ value: '22', label: 'Honda', logo: brandLogos.Honda },
-		{ value: '23', label: 'Hummer', logo: brandLogos.Hummer },
-		{ value: '24', label: 'Hyundai', logo: brandLogos.Hyundai },
-		{ value: '25', label: 'Infiniti', logo: brandLogos.Infiniti },
-		{ value: '26', label: 'Jaguar', logo: brandLogos.Jaguar },
-		{ value: '27', label: 'Jeep', logo: brandLogos.Jeep },
-		{
-			value: '28',
-			label: 'KG Mobility Ssangyong',
-			logo: brandLogos['KG Mobility (SsangYong)'],
-		},
-		{ value: '29', label: 'Kia', logo: brandLogos.KIA },
-		{ value: '30', label: 'Lamborghini', logo: brandLogos.Lamborghini },
-		{ value: '31', label: 'Land Rover', logo: brandLogos['Land Rover'] },
-		{ value: '32', label: 'Lexus', logo: brandLogos.Lexus },
-		{ value: '33', label: 'Lincoln', logo: brandLogos.Lincoln },
-		{ value: '34', label: 'Lotus', logo: brandLogos.Lotus },
-		{ value: '35', label: 'Maserati', logo: brandLogos.Maserati },
-		{ value: '36', label: 'Maybach', logo: brandLogos.Maybach },
-		{ value: '37', label: 'Mazda', logo: brandLogos.Mazda },
-		{ value: '38', label: 'McLaren', logo: brandLogos.McLaren },
-		{ value: '39', label: 'Mercedes-Benz', logo: brandLogos['Mercedes-Benz'] },
-		{ value: '40', label: 'Mercury', logo: '' },
-		{ value: '41', label: 'Mini', logo: brandLogos.Mini },
-		{ value: '42', label: 'Mitsubishi', logo: brandLogos.Mitsubishi },
-		{ value: '43', label: 'Mitsuoka', logo: brandLogos.Mitsuoka },
-		{ value: '44', label: 'Nissan', logo: brandLogos.Nissan },
-		{ value: '45', label: 'Others', logo: '' },
-		{ value: '46', label: 'Peugeot', logo: brandLogos.Peugeot },
-		{ value: '47', label: 'Polestar', logo: brandLogos.Polestar },
-		{ value: '48', label: 'Porsche', logo: brandLogos.Porsche },
-		{ value: '49', label: 'Renault-Korea Samsung', logo: brandLogos.Renault },
-		{ value: '50', label: 'Rolls-Royce', logo: brandLogos['Rolls-Royce'] },
-		{ value: '51', label: 'Saab', logo: brandLogos.SAAB },
-		{ value: '52', label: 'Scion', logo: brandLogos.Scion },
-		{ value: '53', label: 'Smart', logo: brandLogos.Smart },
-		{ value: '54', label: 'Subaru', logo: brandLogos.Subaru },
-		{ value: '55', label: 'Suzuki', logo: brandLogos.Suzuki },
-		{ value: '56', label: 'Tesla', logo: brandLogos.Tesla },
-		{ value: '57', label: 'Toyota', logo: brandLogos.Toyota },
-		{ value: '58', label: 'Volkswagen', logo: brandLogos.Volkswagen },
-		{ value: '59', label: 'Volvo', logo: brandLogos.Volvo },
-	]
+	const [loading, setLoading] = useState(false)
+	const [searchByNumber, setSearchByNumber] = useState('')
 
-	// Список годов для фильтра
-	const years = [
-		'2011',
-		'2012',
-		'2013',
-		'2014',
-		'2015',
-		'2016',
-		'2017',
-		'2018',
-		'2019',
-		'2020',
-		'2021',
-		'2022',
-		'2023',
-		'2024',
-		'2025',
-	]
+	const [currentPage, setCurrentPage] = useState(1)
+	const [totalCars, setTotalCars] = useState(0)
 
-	const sortOptions = [
-		{ value: '', label: 'Сортировать по' },
-		{ value: 'FINISH-ASC', label: 'По возрастанию цены в вонах' },
-		{ value: 'FINISH-DESC', label: 'По убыванию цены в вонах' },
-		{ value: 'YEAR-ASC', label: 'Год по возрастанию' },
-		{ value: 'YEAR-DESC', label: 'Год по убыванию' },
-		{ value: 'MILEAGE-ASC', label: 'Пробег по возрастанию' },
-		{ value: 'MILEAGE-DESC', label: 'Пробег по убыванию' },
-		{ value: 'CREATE_AT-DESC', label: 'По дате добавления' },
-	]
+	const [priceStart, setPriceStart] = useState('')
+	const [priceEnd, setPriceEnd] = useState('')
 
-	// Функция для получения данных с APIy
-	const fetchCars = async (pageNumber = 1, customFilters = filters) => {
-		try {
-			setLoading(true)
-			const response = await axios.get(
-				`https://encar-moscow-proxy.onrender.com/api/proxy?url=${encodeURIComponent(
-					`https://api.darvin.digital/api.php?method=get_cars&marka_id=${customFilters.brand}&model_id=${customFilters.model}&year_from=${customFilters.yearFrom}&year_to=${customFilters.yearTo}&mileage_from=${customFilters.mileageFrom}&mileage_to=${customFilters.mileageTo}&engine_from=${customFilters.capacityFrom}&engine_to=${customFilters.capacityTo}&price_from=${customFilters.priceFrom}&price_to=${customFilters.priceTo}&sort=${sortOption}&page=${pageNumber}`,
-				)}`,
-			)
-			const newCars = response.data
+	const [mileageStart, setMileageStart] = useState('')
+	const [mileageEnd, setMileageEnd] = useState('')
 
-			setCars(newCars)
-			setLoading(false)
-		} catch (error) {
-			console.error('Ошибка при загрузке данных:', error)
-			setLoading(false)
-		}
+	const [endYear, setEndYear] = useState('')
+	const [endMonth, setEndMonth] = useState('00')
+
+	const [startYear, setStartYear] = useState('')
+	const [startMonth, setStartMonth] = useState('00')
+
+	const [usdKrwRate, setUsdKrwRate] = useState(null)
+
+	const [cars, setCars] = useState([])
+
+	const [manufacturers, setManufacturers] = useState(null)
+	const [selectedManufacturer, setSelectedManufacturer] = useState('')
+
+	const [modelGroups, setModelGroups] = useState(null)
+	const [selectedModelGroup, setSelectedModelGroup] = useState('')
+
+	const [models, setModels] = useState(null)
+	const [selectedModel, setSelectedModel] = useState('')
+
+	const [configurations, setConfigurations] = useState(null)
+	const [selectedConfiguration, setSelectedConfiguration] = useState('')
+
+	const [badges, setBadges] = useState(null)
+	const [selectedBadge, setSelectedBadge] = useState('')
+
+	const [badgeDetails, setBadgeDetails] = useState(null)
+	const [selectedBadgeDetails, setSelectedBadgeDetails] = useState('')
+
+	const [error, setError] = useState('')
+
+	const sortOptions = {
+		newest: '|ModifiedDate',
+		priceAsc: '|PriceAsc',
+		priceDesc: '|PriceDesc',
+		mileageAsc: '|MileageAsc',
+		mileageDesc: '|MileageDesc',
+		yearDesc: '|Year',
 	}
 
-	// Получаем общее кол-во автомобилей по поиску или без
-	const fetchTotalCars = async (customFilters = filters) => {
-		try {
-			const response = await axios.get(
-				`https://encar-moscow-proxy.onrender.com/api/proxy?url=${encodeURIComponent(
-					`https://api.darvin.digital/api.php?method=get_cars_count&marka_id=${customFilters.brand}&model_id=${customFilters.model}&year_from=${customFilters.yearFrom}&year_to=${customFilters.yearTo}&mileage_from=${customFilters.mileageFrom}&mileage_to=${customFilters.mileageTo}&engine_from=${customFilters.capacityFrom}&engine_to=${customFilters.capacityTo}&price_from=${customFilters.priceFrom}&price_to=${customFilters.priceTo}&sort=${sortOption}`,
-				)}`,
-			)
-
-			if (response.data.length > 0 && response.data[0].TOTAL_COUNT) {
-				const totalCars = response.data[0].TOTAL_COUNT
-				const carsPerPage = 24 // ⚡ Количество машин на странице
-
-				setTotalPages(Math.ceil(totalCars / carsPerPage))
-			} else {
-				setTotalPages(1)
-			}
-		} catch (error) {
-			console.error(
-				'Ошибка при получении общего количества автомобилей:',
-				error,
-			)
-			setTotalPages(1)
-		}
-	}
-
-	// Загрузка данных при первом рендере и при изменении номера страницы
 	useEffect(() => {
-		const params = new URLSearchParams(location.search)
-		const brandFromURL = params.get('brand')
-		const modelFromURL = params.get('model')
-		const yearFromURL = params.get('yearFrom')
-		const yearToURL = params.get('yearTo')
-		const mileageFromURL = params.get('mileageFrom')
-		const mileageToURL = params.get('mileageTo')
-
-		const newFilters = {
-			...filters,
-			brand: brandFromURL || '',
-			model: modelFromURL || '',
-			yearFrom: yearFromURL || '',
-			yearTo: yearToURL || '',
-			mileageFrom: mileageFromURL || '',
-			mileageTo: mileageToURL || '',
+		const searchParams = new URLSearchParams(location.search)
+		urlParams.current = {
+			manufacturer: searchParams.get('manufacturer'),
+			modelGroup: searchParams.get('modelGroup'),
+			model: searchParams.get('model'),
 		}
 
-		setFilters(newFilters)
+		if (urlParams.current.manufacturer) {
+			setSelectedManufacturer(urlParams.current.manufacturer)
+		}
+	}, [location.search])
 
-		if (brandFromURL) {
-			fetchModels(brandFromURL).then(() => {
-				fetchCars(currentPage, newFilters)
-				fetchTotalCars(newFilters)
-			})
-		} else {
-			fetchCars(currentPage, newFilters)
-			fetchTotalCars(newFilters)
+	useEffect(() => {
+		const savedFiltersRaw = localStorage.getItem('exportCatalogFilters')
+		if (!savedFiltersRaw) {
+			filtersReady.current = true
+			return
 		}
 
-		window.history.replaceState({}, '')
-	}, [currentPage])
+		try {
+			const savedFilters = JSON.parse(savedFiltersRaw)
+
+			setSelectedManufacturer(
+				urlParams.current.manufacturer ||
+					savedFilters.selectedManufacturer ||
+					'',
+			)
+			setSelectedConfiguration(savedFilters.selectedConfiguration || '')
+			setSelectedBadge(savedFilters.selectedBadge || '')
+			setSelectedBadgeDetails(savedFilters.selectedBadgeDetails || '')
+			setStartYear(savedFilters.startYear || '')
+			setStartMonth(savedFilters.startMonth || '00')
+			setEndYear(savedFilters.endYear || '')
+			setEndMonth(savedFilters.endMonth || '00')
+			setMileageStart(savedFilters.mileageStart || '')
+			setMileageEnd(savedFilters.mileageEnd || '')
+			setPriceStart(savedFilters.priceStart || '')
+			setPriceEnd(savedFilters.priceEnd || '')
+			setSearchByNumber(savedFilters.searchByNumber || '')
+
+			setTimeout(() => {
+				filtersReady.current = true
+			}, 0)
+		} catch (e) {
+			console.error('Ошибка при чтении фильтров из localStorage', e)
+			filtersReady.current = true
+		}
+	}, [])
+
+	useEffect(() => {
+		const filters = {
+			selectedManufacturer,
+			selectedModelGroup,
+			selectedModel,
+			selectedConfiguration,
+			selectedBadge,
+			selectedBadgeDetails,
+			startYear,
+			startMonth,
+			endYear,
+			endMonth,
+			mileageStart,
+			mileageEnd,
+			priceStart,
+			priceEnd,
+			searchByNumber,
+		}
+		localStorage.setItem('exportCatalogFilters', JSON.stringify(filters))
+	}, [
+		selectedManufacturer,
+		selectedModelGroup,
+		selectedModel,
+		selectedConfiguration,
+		selectedBadge,
+		selectedBadgeDetails,
+		startYear,
+		startMonth,
+		endYear,
+		endMonth,
+		mileageStart,
+		mileageEnd,
+		priceStart,
+		priceEnd,
+		searchByNumber,
+	])
 
 	useEffect(() => {
 		const fetchUsdKrwRate = async () => {
@@ -220,6 +165,9 @@ const Catalog = () => {
 				if (response.status === 200) {
 					const jsonData = response.data
 					const rate = jsonData['usd']['krw']
+
+					console.log(rate)
+
 					setUsdKrwRate(rate)
 				}
 			} catch (e) {
@@ -230,601 +178,969 @@ const Catalog = () => {
 		fetchUsdKrwRate()
 	}, [])
 
-	// Функция для изменения текущей страницы
-	const changePage = (pageNumber) => {
-		window.scrollTo({ top: 0, left: 0, behavior: 'smooth' })
-		if (pageNumber < 1 || pageNumber > totalPages) return
-		setCurrentPage(pageNumber)
-	}
-
-	// Функция для получения моделей по выбранной марке
-	const fetchModels = async (brandId) => {
-		try {
-			const response = await axios.get(
-				`https://encar-moscow-proxy.onrender.com/api/proxy?url=${encodeURIComponent(
-					`https://api.darvin.digital/api.php?method=get_model&marka_id=${brandId}`,
-				)}`,
-			)
-			setModels(response.data)
-		} catch (error) {
-			console.error('Ошибка при загрузке моделей:', error)
+	useEffect(() => {
+		if (filtersReady.current) {
+			fetchCars()
 		}
-	}
+	}, [filtersReady.current])
 
-	// Логика для фильтров по году
-	const filteredYearsFrom = years.filter(
-		(year) => !filters.yearTo || parseInt(year) <= parseInt(filters.yearTo),
-	)
-	const filteredYearsTo = years.filter(
-		(year) => !filters.yearFrom || parseInt(year) >= parseInt(filters.yearFrom),
-	)
+	useEffect(() => {
+		const fetchManufacturers = async () => {
+			setCurrentPage(1)
+			const url = `https://api.encar.com/search/car/list/general?count=true&q=(And.Hidden.N._.SellType.%EC%9D%BC%EB%B0%98._.CarType.A.)&inav=%7CMetadata%7CSort`
 
-	const handleMileageChange = (e) => {
-		const { name, value } = e.target
-		setFilters((prevFilters) => {
-			// Преобразуем в число для сравнения
-			const numValue = Number(value)
+			const response = await axios.get(url)
 
-			// Логика для mileageFrom
-			if (name === 'mileageFrom') {
-				// Если значение меньше чем mileageTo или mileageTo пустое, то обновляем
-				if (
-					numValue < Number(prevFilters.mileageTo) ||
-					!prevFilters.mileageTo
-				) {
-					return {
-						...prevFilters,
-						mileageFrom: value,
+			const data = response.data
+			const count = data?.Count
+
+			setTotalCars(count)
+
+			const manufacturers =
+				data?.iNav?.Nodes[2]?.Facets[0]?.Refinements?.Nodes[0]?.Facets
+
+			setManufacturers(manufacturers)
+		}
+
+		fetchManufacturers()
+	}, [])
+
+	useEffect(() => {
+		const fetchModelGroups = async () => {
+			if (!selectedManufacturer) return
+
+			setCurrentPage(1)
+
+			const url = `https://api.encar.com/search/car/list/general?count=true&q=(And.Hidden.N._.SellType.%EC%9D%BC%EB%B0%98._.(C.CarType.A._.Manufacturer.${selectedManufacturer}.))&inav=%7CMetadata%7CSort`
+
+			try {
+				const response = await axios.get(url)
+				const data = response?.data
+				const count = data?.Count
+
+				setTotalCars(count)
+
+				const allManufacturers =
+					data?.iNav?.Nodes[2]?.Facets[0]?.Refinements?.Nodes[0]?.Facets
+
+				const filteredManufacturer = allManufacturers.filter(
+					(item) => item.IsSelected === true,
+				)[0]
+
+				const models = filteredManufacturer?.Refinements?.Nodes[0]?.Facets
+
+				setModelGroups(models)
+
+				if (urlParams.current.modelGroup) {
+					const modelExists = models?.some(
+						(model) => model.Value === urlParams.current.modelGroup,
+					)
+					if (modelExists) {
+						setSelectedModelGroup(urlParams.current.modelGroup)
 					}
 				}
-			}
-
-			// Логика для mileageTo
-			if (name === 'mileageTo') {
-				// Если значение больше чем mileageFrom или mileageFrom пустое, то обновляем
-				if (
-					numValue > Number(prevFilters.mileageFrom) ||
-					!prevFilters.mileageFrom
-				) {
-					return {
-						...prevFilters,
-						mileageTo: value,
-					}
-				}
-			}
-
-			// Возвращаем текущее состояние, если условия не выполнены
-			return prevFilters
-		})
-	}
-
-	const handleCapacityChange = (e) => {
-		const { name, value } = e.target
-
-		setFilters((prevFilters) => {
-			const numValue = Number(value)
-
-			// Логика для capacityFrom
-			if (name === 'capacityFrom') {
-				// Если capacityTo больше или равно capacityFrom или capacityTo пустое, то обновляем
-				if (
-					Number(prevFilters.capacityTo) >= numValue ||
-					!prevFilters.capacityTo
-				) {
-					return {
-						...prevFilters,
-						capacityFrom: value,
-					}
-				}
-			}
-
-			// Логика для capacityTo
-			if (name === 'capacityTo') {
-				// Если capacityFrom меньше или равно capacityTo или capacityFrom пустое, то обновляем
-				if (
-					Number(prevFilters.capacityFrom) <= numValue ||
-					!prevFilters.capacityFrom
-				) {
-					return {
-						...prevFilters,
-						capacityTo: value,
-					}
-				}
-			}
-
-			// Возвращаем текущее состояние, если условия не выполнены
-			return prevFilters
-		})
-	}
-
-	// Обработка изменений в фильтрах
-	const handleFilterChange = (e) => {
-		const { name, value } = e.target
-		setFilters((prevFilters) => ({
-			...prevFilters,
-			[name]: value,
-		}))
-
-		// Если выбрана марка, подгружаем модели
-		if (name === 'brand') {
-			if (value) {
-				fetchModels(value)
-			} else {
-				setModels([])
-				setFilters((prevFilters) => ({
-					...prevFilters,
-					model: '',
-				}))
+			} catch (error) {
+				console.error('Ошибка при загрузке моделей:', error)
 			}
 		}
-	}
 
-	// Применение фильтров
-	const applyFilters = () => {
-		setCurrentPage(1) // Сброс на первую страницу
-		fetchTotalCars() // Потом получаем количество страниц
-		fetchCars(1) // Перезагружаем список машин с новыми фильтрами
-	}
+		fetchModelGroups()
+	}, [selectedManufacturer])
 
-	// Сброс фильтров
-	const resetFilters = () => {
-		setFilters({
-			brand: '',
-			model: '',
-			yearFrom: '',
-			yearTo: '',
-			mileageFrom: '',
-			mileageTo: '',
-			capacityFrom: '',
-			capacityTo: '',
-			priceFrom: '',
-			priceTo: '',
-		})
+	useEffect(() => {
+		const fetchModelGroups = async () => {
+			if (!selectedModelGroup) return
+			setCurrentPage(1)
+
+			const url = `https://api.encar.com/search/car/list/general?count=true&q=(And.Hidden.N._.SellType.%EC%9D%BC%EB%B0%98._.(C.CarType.A._.(C.Manufacturer.${selectedManufacturer}._.ModelGroup.${selectedModelGroup}.)))&inav=%7CMetadata%7CSort`
+			const response = await axios.get(url)
+
+			const data = response?.data
+			const count = data?.Count
+
+			setTotalCars(count)
+
+			const allManufacturers =
+				data?.iNav?.Nodes[2]?.Facets[0]?.Refinements?.Nodes[0]?.Facets
+
+			const filteredManufacturer = allManufacturers.filter(
+				(item) => item.IsSelected === true,
+			)[0]
+
+			const modelGroup = filteredManufacturer?.Refinements?.Nodes[0]?.Facets
+			const filteredModel = modelGroup.filter(
+				(item) => item.IsSelected === true,
+			)[0]
+			const models = filteredModel?.Refinements?.Nodes[0]?.Facets
+
+			setModels(models)
+
+			if (urlParams.current.model) {
+				const modelExists = models?.some(
+					(model) => model.Value === urlParams.current.model,
+				)
+				if (modelExists) {
+					setSelectedModel(urlParams.current.model)
+				}
+				urlParams.current = {
+					manufacturer: null,
+					modelGroup: null,
+					model: null,
+				}
+			}
+		}
+
+		fetchModelGroups()
+	}, [selectedManufacturer, selectedModelGroup])
+
+	useEffect(() => {
+		const fetchConfigurations = async () => {
+			if (!selectedModel) return
+			setCurrentPage(1)
+
+			const url = `https://api.encar.com/search/car/list/general?count=true&q=(And.Hidden.N._.(C.CarType.A._.(C.Manufacturer.${selectedManufacturer}._.(C.ModelGroup.${selectedModelGroup}._.Model.${selectedModel}.))))&inav=%7CMetadata%7CSort`
+
+			const response = await axios.get(url)
+
+			const data = response?.data
+			const count = data?.Count
+
+			setTotalCars(count)
+
+			const allManufacturers =
+				data?.iNav?.Nodes[1]?.Facets[0]?.Refinements?.Nodes[0]?.Facets
+
+			const filteredManufacturer = allManufacturers.filter(
+				(item) => item.IsSelected === true,
+			)[0]
+
+			const modelGroup = filteredManufacturer?.Refinements?.Nodes[0]?.Facets
+
+			const filteredModel = modelGroup?.filter(
+				(item) => item.IsSelected === true,
+			)[0]
+
+			const models = filteredModel?.Refinements?.Nodes[0]?.Facets
+			const filteredConfiguration = models?.filter(
+				(item) => item.IsSelected === true,
+			)[0]
+
+			const configurations =
+				filteredConfiguration?.Refinements?.Nodes[0]?.Facets
+
+			setConfigurations(configurations)
+		}
+
+		fetchConfigurations()
+	}, [selectedManufacturer, selectedModelGroup, selectedModel])
+
+	useEffect(() => {
+		if (!selectedConfiguration) return
 		setCurrentPage(1)
-		setSortOption('')
-		setModels([])
-	}
 
-	// Генерация кнопок пагинации
-	const renderPagination = () => {
-		const maxPageButtons = 1 // Количество страниц слева и справа
-		const pageNumbers = []
+		const fetchBadges = async () => {
+			const url = `https://api.encar.com/search/car/list/general?count=true&q=(And.Hidden.N._.(C.CarType.A._.(C.Manufacturer.${selectedManufacturer}._.(C.ModelGroup.${selectedModelGroup}._.(C.Model.${selectedModel}._.BadgeGroup.${selectedConfiguration}.)))))&inav=%7CMetadata%7CSort`
 
-		const startPage = Math.max(1, currentPage - maxPageButtons)
-		const endPage = Math.min(totalPages, currentPage + maxPageButtons)
+			const response = await axios.get(url)
 
-		// Добавляем кнопку "Первая страница", если currentPage > 1
-		if (startPage > 1) {
-			pageNumbers.push(
-				<button
-					key={1}
-					onClick={() => changePage(1)}
-					className={`cursor-pointer w-10 h-10 border rounded-md mx-1 transition duration-300 ${
-						currentPage === 1
-							? 'bg-gray-200 text-gray-800 font-bold'
-							: 'bg-white hover:bg-gray-100 text-gray-600'
-					}`}
-				>
-					1
-				</button>,
-			)
+			const data = response?.data
+			const count = data?.Count
 
-			if (startPage > 2) {
-				pageNumbers.push(<span key='dots1'>...</span>)
+			setTotalCars(count)
+
+			const allManufacturers =
+				data?.iNav?.Nodes[1]?.Facets[0]?.Refinements?.Nodes[0]?.Facets
+
+			const filteredManufacturer = allManufacturers.filter(
+				(item) => item.IsSelected === true,
+			)[0]
+
+			const modelGroup = filteredManufacturer?.Refinements?.Nodes[0]?.Facets
+
+			const filteredModel = modelGroup?.filter(
+				(item) => item.IsSelected === true,
+			)[0]
+
+			const models = filteredModel?.Refinements?.Nodes[0]?.Facets
+			const filteredConfiguration = models?.filter(
+				(item) => item.IsSelected === true,
+			)[0]
+
+			const configurations =
+				filteredConfiguration?.Refinements?.Nodes[0]?.Facets
+
+			const filteredBadgeGroup = configurations?.filter(
+				(item) => item.IsSelected === true,
+			)[0]
+
+			const badges = filteredBadgeGroup?.Refinements?.Nodes[0]?.Facets
+
+			setBadges(badges)
+		}
+
+		fetchBadges()
+	}, [
+		selectedManufacturer,
+		selectedModelGroup,
+		selectedModel,
+		selectedConfiguration,
+		selectedBadge,
+	])
+
+	useEffect(() => {
+		const fetchBadgeDetails = async () => {
+			if (!selectedBadge) return
+			setCurrentPage(1)
+
+			const url = `https://api.encar.com/search/car/list/general?count=true&q=(And.Hidden.N._.SellType.%EC%9D%BC%EB%B0%98._.(C.CarType.A._.(C.Manufacturer.${selectedManufacturer}._.(C.ModelGroup.${selectedModelGroup}._.(C.Model.${selectedModel}._.(C.BadgeGroup.${selectedConfiguration}._.Badge.${transformBadgeValue(
+				selectedBadge,
+			)}.))))))&inav=%7CMetadata%7CSort`
+
+			console.log(url)
+
+			try {
+				const response = await axios.get(url)
+
+				const data = response?.data
+
+				const count = data?.Count
+
+				setTotalCars(count)
+
+				const allManufacturers =
+					data?.iNav?.Nodes[2]?.Facets[0]?.Refinements?.Nodes[0]?.Facets
+
+				const filteredManufacturer = allManufacturers?.find(
+					(item) => item.IsSelected,
+				)
+				const modelGroup = filteredManufacturer?.Refinements?.Nodes[0]?.Facets
+				const filteredModel = modelGroup?.find((item) => item.IsSelected)
+
+				const models = filteredModel?.Refinements?.Nodes[0]?.Facets
+				const filteredConfiguration = models?.find((item) => item.IsSelected)
+
+				const configurations =
+					filteredConfiguration?.Refinements?.Nodes[0]?.Facets
+				const filteredBadgeGroup = configurations?.find(
+					(item) => item.IsSelected,
+				)
+
+				const badges = filteredBadgeGroup?.Refinements?.Nodes[0]?.Facets
+				const filteredBadge = badges?.find((item) => item.IsSelected)
+
+				const badgeDetails = filteredBadge?.Refinements?.Nodes[0]?.Facets
+
+				setBadgeDetails(badgeDetails)
+			} catch (error) {
+				console.error('Ошибка при получении badgeDetails:', error)
 			}
 		}
 
-		// Добавляем страницы в диапазоне
-		for (let i = startPage; i <= endPage; i++) {
-			pageNumbers.push(
-				<button
-					key={i}
-					onClick={() => changePage(i)}
-					className={`cursor-pointer w-10 h-10 border rounded-md mx-1 transition duration-300 ${
-						i === currentPage
-							? 'bg-gray-200 text-gray-800 font-bold'
-							: 'bg-white hover:bg-gray-100 text-gray-600'
-					}`}
-				>
-					{i}
-				</button>,
+		fetchBadgeDetails()
+	}, [
+		selectedManufacturer,
+		selectedModelGroup,
+		selectedModel,
+		selectedConfiguration,
+		selectedBadge,
+	])
+
+	const fetchCars = async () => {
+		setLoading(true)
+		setError('')
+
+		let queryParts = []
+		let filters = []
+
+		if (searchByNumber) {
+			queryParts.push(
+				`(And.Hidden.N._.CarType.A._.Simple.keyword(${searchByNumber}).)`,
 			)
+		} else {
+			queryParts.push('(And.Hidden.N._.SellType.일반._.')
 		}
 
-		// Добавляем кнопку "Последняя страница", если currentPage < totalPages
-		if (endPage < totalPages) {
-			if (endPage < totalPages - 1) {
-				pageNumbers.push(<span key='dots2'>...</span>)
+		if (selectedManufacturer) {
+			if (
+				selectedModelGroup &&
+				selectedModel &&
+				selectedConfiguration &&
+				selectedBadge &&
+				selectedBadgeDetails
+			) {
+				queryParts.push(
+					`(C.CarType.A._.(C.Manufacturer.${selectedManufacturer}._.(C.ModelGroup.${selectedModelGroup}._.(C.Model.${selectedModel}._.(C.BadgeGroup.${selectedConfiguration}._.(C.Badge.${transformBadgeValue(
+						selectedBadge,
+					)}._.BadgeDetail.${selectedBadgeDetails}.))))))`,
+				)
+			} else if (
+				selectedModelGroup &&
+				selectedModel &&
+				selectedConfiguration &&
+				selectedBadge
+			) {
+				queryParts.push(
+					`(C.CarType.A._.(C.Manufacturer.${selectedManufacturer}._.(C.ModelGroup.${selectedModelGroup}._.(C.Model.${selectedModel}._.(C.BadgeGroup.${selectedConfiguration}._.Badge.${transformBadgeValue(
+						selectedBadge,
+					)}.)))))`,
+				)
+			} else if (selectedModelGroup && selectedModel && selectedConfiguration) {
+				queryParts.push(
+					`(C.CarType.A._.(C.Manufacturer.${selectedManufacturer}._.(C.ModelGroup.${selectedModelGroup}._.(C.Model.${selectedModel}._.BadgeGroup.${selectedConfiguration}.))))`,
+				)
+			} else if (selectedModelGroup && selectedModel) {
+				queryParts.push(
+					`(C.CarType.A._.(C.Manufacturer.${selectedManufacturer}._.(C.ModelGroup.${selectedModelGroup}._.Model.${selectedModel}.)))`,
+				)
+			} else if (selectedModelGroup) {
+				queryParts.push(
+					`(C.CarType.A._.(C.Manufacturer.${selectedManufacturer}._.ModelGroup.${selectedModelGroup}.))`,
+				)
+			} else {
+				queryParts.push(`(C.CarType.A._.Manufacturer.${selectedManufacturer}.)`)
+			}
+		} else {
+			queryParts.push('CarType.A.')
+		}
+
+		if (mileageStart && mileageEnd) {
+			filters.push(`Mileage.range(${mileageStart}..${mileageEnd}).`)
+		} else if (mileageStart) {
+			filters.push(`Mileage.range(${mileageStart}..).`)
+		} else if (mileageEnd) {
+			filters.push(`Mileage.range(..${mileageEnd}).`)
+		}
+
+		if (startYear && startMonth && endYear && endMonth) {
+			filters.push(
+				`Year.range(${startYear}${startMonth}..${endYear}${endMonth}).`,
+			)
+		} else if (startYear && startMonth) {
+			filters.push(`Year.range(${startYear}${startMonth}..).`)
+		} else if (endYear && endMonth) {
+			filters.push(`Year.range(..${endYear}${endMonth}).`)
+		} else if (startYear && endYear) {
+			filters.push(`Year.range(${startYear}00..${endYear}99).`)
+		} else if (startYear) {
+			filters.push(`Year.range(${startYear}00..).`)
+		} else if (endYear) {
+			filters.push(`Year.range(..${endYear}99).`)
+		}
+
+		if (priceStart && priceEnd) {
+			filters.push(`Price.range(${priceStart}..${priceEnd}).`)
+		} else if (priceStart) {
+			filters.push(`Price.range(${priceStart}..).`)
+		} else if (priceEnd) {
+			filters.push(`Price.range(..${priceEnd}).`)
+		}
+
+		let query =
+			queryParts.join('') +
+			(filters.length ? `_.${filters.join('_.')}` : '') +
+			')'
+
+		const encodedQuery = encodeURIComponent(query)
+		const itemsPerPage = 20
+		const offset = (currentPage - 1) * itemsPerPage
+
+		const url = `https://encar-proxy.onrender.com/api/catalog?count=true&q=${encodedQuery}&sr=${encodeURIComponent(
+			sortOptions[sortOption],
+		)}%7C${offset}%7C${itemsPerPage}`
+
+		console.log('Generated q=', query)
+		console.log(url)
+
+		try {
+			const response = await axios.get(url)
+
+			if (response.data && response.data.error) {
+				console.error('Получен ответ с ошибкой:', response.data.error)
+				setError(
+					'На сайте ведутся технические работы. Пожалуйста, попробуйте позже.',
+				)
+				setCars([])
+				setLoading(false)
+				return
 			}
 
-			pageNumbers.push(
-				<button
-					key={totalPages}
-					onClick={() => changePage(totalPages)}
-					className={`cursor-pointer w-10 h-10 border rounded-md mx-1 transition duration-300 ${
-						currentPage === totalPages
-							? 'bg-gray-200 text-gray-800 font-bold'
-							: 'bg-white hover:bg-gray-100 text-gray-600'
-					}`}
-				>
-					{totalPages}
-				</button>,
+			setCars(response.data?.SearchResults || [])
+			setLoading(false)
+			window.scrollTo({ top: 0, behavior: 'smooth' })
+		} catch (error) {
+			console.error('Ошибка при загрузке автомобилей:', error)
+			setError(
+				'На сайте ведутся технические работы. Пожалуйста, попробуйте позже.',
+			)
+			setCars([])
+			setLoading(false)
+		}
+	}
+
+	useEffect(() => {
+		if (filtersReady.current) {
+			fetchCars()
+		}
+	}, [
+		selectedManufacturer,
+		selectedModelGroup,
+		selectedModel,
+		selectedConfiguration,
+		selectedBadge,
+		selectedBadgeDetails,
+		startYear,
+		startMonth,
+		endYear,
+		endMonth,
+		mileageStart,
+		mileageEnd,
+		priceStart,
+		priceEnd,
+		searchByNumber,
+		currentPage,
+		sortOption,
+	])
+
+	useEffect(() => {
+		if (!selectedManufacturer) {
+			setSelectedModelGroup('')
+			setSelectedModel('')
+			setSelectedConfiguration('')
+			setSelectedBadge('')
+			setSelectedBadgeDetails('')
+		}
+	}, [selectedManufacturer])
+
+	useEffect(() => {
+		if (!selectedModelGroup) {
+			setSelectedModel('')
+			setSelectedConfiguration('')
+			setSelectedBadge('')
+			setSelectedBadgeDetails('')
+		}
+	}, [selectedModelGroup])
+
+	useEffect(() => {
+		if (!selectedModel) {
+			setSelectedConfiguration('')
+			setSelectedBadge('')
+			setSelectedBadgeDetails('')
+		}
+	}, [selectedModel])
+
+	useEffect(() => {
+		if (!selectedConfiguration) {
+			setSelectedBadge('')
+			setSelectedBadgeDetails('')
+		}
+	}, [selectedConfiguration])
+
+	useEffect(() => {
+		if (!selectedBadge) {
+			setSelectedBadgeDetails('')
+		}
+	}, [selectedBadge])
+
+	const handleManufacturerChange = (e) => {
+		const value = e.target.value
+		setSelectedModelGroup('')
+		setSelectedModel('')
+		setSelectedConfiguration('')
+		setSelectedBadge('')
+		setSelectedBadgeDetails('')
+		setSelectedManufacturer(value)
+		setCurrentPage(1)
+
+		if (value) {
+			navigate(`/catalog?manufacturer=${value}`)
+		} else {
+			navigate('/catalog')
+		}
+	}
+
+	const handleModelGroupChange = (e) => {
+		const value = e.target.value
+		setSelectedModel('')
+		setSelectedConfiguration('')
+		setSelectedBadge('')
+		setSelectedBadgeDetails('')
+		setSelectedModelGroup(value)
+		setCurrentPage(1)
+
+		if (value) {
+			navigate(
+				`/catalog?manufacturer=${selectedManufacturer}&modelGroup=${value}`,
+			)
+		} else {
+			navigate(`/catalog?manufacturer=${selectedManufacturer}`)
+		}
+	}
+
+	const handleModelChange = (e) => {
+		const value = e.target.value
+		setSelectedConfiguration('')
+		setSelectedBadge('')
+		setSelectedBadgeDetails('')
+		setSelectedModel(value)
+		setCurrentPage(1)
+
+		if (value) {
+			navigate(
+				`/catalog?manufacturer=${selectedManufacturer}&modelGroup=${selectedModelGroup}&model=${value}`,
+			)
+		} else {
+			navigate(
+				`/catalog?manufacturer=${selectedManufacturer}&modelGroup=${selectedModelGroup}`,
 			)
 		}
-
-		return (
-			<div className='flex justify-center mt-10 mb-20 px-5'>
-				{/* Кнопка "Назад" */}
-				<button
-					onClick={() => changePage(currentPage - 1)}
-					className='cursor-pointer w-10 h-10 border rounded-md mx-1 transition duration-300 hover:bg-gray-100 text-gray-600'
-					disabled={currentPage === 1}
-				>
-					&lt;
-				</button>
-
-				{pageNumbers}
-
-				{/* Кнопка "Вперёд" */}
-				<button
-					onClick={() => changePage(currentPage + 1)}
-					className='cursor-pointer w-10 h-10 border rounded-md mx-1 transition duration-300 hover:bg-gray-100 text-gray-600'
-					disabled={currentPage === totalPages}
-				>
-					&gt;
-				</button>
-			</div>
-		)
 	}
 
-	const handleSortChange = (e) => {
-		setSortOption(e.target.value)
-		setCurrentPage(1) // Сбрасываем страницу на первую
+	const handleConfigurationChange = (e) => {
+		const value = e.target.value
+		setSelectedBadge('')
+		setSelectedBadgeDetails('')
+		setSelectedConfiguration(value)
+		setCurrentPage(1)
 	}
 
-	// Кастомный рендер опций
-	const customSingleValue = ({ data }) => (
-		<div className='flex items-center'>
-			{data.logo && (
-				<img src={data.logo} alt={data.label} className='w-6 mr-2' />
-			)}
-			<span>{data.label}</span>
-		</div>
-	)
-
-	const customOption = (props) => {
-		const { data, innerRef, innerProps } = props
-		return (
-			<div
-				ref={innerRef}
-				{...innerProps}
-				className='flex items-center p-2 hover:bg-gray-200 cursor-pointer'
-			>
-				{data.logo && (
-					<img src={data.logo} alt={data.label} className='w-6 h-6 mr-2' />
-				)}
-				<span>{data.label}</span>
-			</div>
-		)
+	const handleBadgeChange = (e) => {
+		const value = e.target.value
+		setSelectedBadgeDetails('')
+		setSelectedBadge(value)
+		setCurrentPage(1)
 	}
 
-	// @ts-ignore
-	const BrandSelect = ({ filters, handleFilterChange }) => {
-		const handleChange = (selectedOption) => {
-			handleFilterChange({
-				target: {
-					name: 'brand',
-					value: selectedOption.value,
-				},
-			})
-		}
-
-		return (
-			<div>
-				<label className='block text-gray-700 font-semibold mb-2'>Марка</label>
-				<Select
-					options={brandOptions}
-					value={brandOptions.find((opt) => opt.value === filters.brand)}
-					onChange={handleChange}
-					getOptionLabel={(e) => (
-						<div className='flex items-center '>
-							{e.logo && (
-								<img src={e.logo} alt={e.label} className='w-5 mr-2' />
-							)}
-							<span>{e.label}</span>
-						</div>
-					)}
-					// components={{ SingleValue: customSingleValue, Option: customOption }}
-					className='w-full'
-					isSearchable={false} // 🔥 Отключает возможность ввода текста
-				/>
-			</div>
-		)
+	const handleBadgeDetailsChange = (e) => {
+		const value = e.target.value
+		setSelectedBadgeDetails(value)
+		setCurrentPage(1)
 	}
 
 	return (
-		<div className='mt-24 md:mt-29 m-auto'>
-			<a
-				className='mb-10 block'
-				href='https://www.youtube.com/@koreaexcar'
-				target='_blank'
-				rel='noopener noreferer'
-			>
-				<img
-					src='https://res.cloudinary.com/pomegranitedesign/image/upload/v1742517781/EncarMoscow/channels4_banner.jpg'
-					alt='KoreaExCar Banner YouTube'
-				/>
-			</a>
+		<div className='md:mt-40 mt-35 px-6'>
+			<h1 className='text-3xl font-bold text-center mb-5'>
+				Каталог автомобилей
+			</h1>
+			<div className='md:flex flex-col items-end md:mr-20 md:block hidden'>
+				<label htmlFor='sortOptions'>Сортировать по</label>
+				<select
+					className='border border-gray-300 rounded-md px-4 py-2 shadow-sm'
+					value={sortOption}
+					onChange={(e) => {
+						setSortOption(e.target.value)
+						setCurrentPage(1)
+					}}
+				>
+					<option value='newest'>Сначала новые</option>
+					<option value='priceAsc'>Цена: по возрастанию</option>
+					<option value='priceDesc'>Цена: по убыванию</option>
+					<option value='mileageAsc'>Пробег: по возрастанию</option>
+					<option value='mileageDesc'>Пробег: по убыванию</option>
+					<option value='yearDesc'>Год: от новых</option>
+				</select>
+			</div>
+			<div className='container m-auto grid grid-cols-1 md:grid-cols-5 md:gap-15'>
+				<div className='md:col-span-1.5'>
+					<select
+						className='w-full border border-gray-300 rounded-md px-3 py-2 mt-4'
+						value={selectedManufacturer}
+						onChange={handleManufacturerChange}
+					>
+						<option value=''>Марка</option>
+						{manufacturers
+							?.filter((manufacturer) => manufacturer.Count > 0)
+							.map((manufacturer, index) => (
+								<option key={index} value={manufacturer.Value}>
+									{translateSmartly(manufacturer.Value)} ({manufacturer.Count}{' '}
+									автомобилей)
+								</option>
+							))}
+					</select>
+					<select
+						disabled={selectedManufacturer.length === 0}
+						className='w-full border border-gray-300 rounded-md px-3 py-2 mt-4 disabled:bg-gray-200'
+						value={selectedModelGroup}
+						onChange={handleModelGroupChange}
+					>
+						<option value=''>Модель</option>
+						{modelGroups
+							?.filter((modelGroup) => modelGroup.Count > 0)
+							.map((modelGroup, index) => (
+								<option key={index} value={modelGroup.Value}>
+									{translateSmartly(modelGroup.Value)} ({modelGroup.Count}{' '}
+									автомобилей)
+								</option>
+							))}
+					</select>
+					<select
+						disabled={selectedModelGroup.length === 0}
+						className='w-full border border-gray-300 rounded-md px-3 py-2 mt-4 disabled:bg-gray-200'
+						value={selectedModel}
+						onChange={handleModelChange}
+					>
+						<option value=''>Поколение</option>
+						{models
+							?.filter((model) => model.Count > 0)
+							.map((model, index) => (
+								<option key={index} value={model.Value}>
+									{translations[model.Value] ||
+										translateSmartly(model.Value) ||
+										model.Value}{' '}
+									({formatDate(model?.Metadata?.ModelStartDate[0])} -{' '}
+									{formatDate(model?.Metadata?.ModelEndDate[0])}) ({model.Count}{' '}
+									автомобилей )
+								</option>
+							))}
+					</select>
+					<select
+						disabled={selectedModel.length === 0}
+						className='w-full border border-gray-300 rounded-md px-3 py-2 mt-4 disabled:bg-gray-200'
+						value={selectedConfiguration}
+						onChange={handleConfigurationChange}
+					>
+						<option value=''>Конфигурация</option>
+						{configurations
+							?.filter((configuration) => configuration.Count > 0)
+							.map((configuration, index) => (
+								<option key={index} value={configuration.Value}>
+									{translateSmartly(configuration.Value)} ({configuration.Count}
+									)
+								</option>
+							))}
+					</select>
+					<select
+						disabled={selectedConfiguration.length === 0}
+						className='w-full border border-gray-300 rounded-md px-3 py-2 mt-4 disabled:bg-gray-200'
+						value={selectedBadge}
+						onChange={handleBadgeChange}
+					>
+						<option value=''>Выберите конфигурацию</option>
+						{badges
+							?.filter((badge) => badge.Count > 0)
+							.map((badge, index) => (
+								<option key={index} value={badge.Value}>
+									{translateSmartly(badge.Value)} ({badge.Count})
+								</option>
+							))}
+					</select>
 
-			<div className='container m-auto'>
-				<h1 className='text-3xl font-bold text-center mb-5'>
-					Каталог авто в Корее
-				</h1>
+					<select
+						disabled={selectedBadge.length === 0}
+						className='w-full border border-gray-300 rounded-md px-3 py-2 mt-4 disabled:bg-gray-200'
+						value={selectedBadgeDetails}
+						onChange={handleBadgeDetailsChange}
+					>
+						<option value=''>Выберите комплектацию</option>
+						{badgeDetails
+							?.filter((badgeDetails) => badgeDetails.Count > 0)
+							.map((badgeDetail, index) => (
+								<option key={index} value={badgeDetail.Value}>
+									{translateSmartly(badgeDetail.Value)} ({badgeDetail.Count})
+								</option>
+							))}
+					</select>
 
-				<div className='md:flex md:gap-6'>
-					{/* Форма фильтрации */}
-					<div className='bg-white p-5 rounded-lg shadow-md md:w-1/4'>
-						<form>
-							<div className='grid grid-cols-1 md:grid-cols-1 gap-4'>
-								<div>
-									<BrandSelect
-										filters={filters}
-										handleFilterChange={handleFilterChange}
-									/>
-								</div>
+					<div className='grid grid-cols-2 gap-3'>
+						<select
+							className='w-full border border-gray-300 rounded-md px-3 py-2 mt-4 disabled:bg-gray-200'
+							value={startYear}
+							onChange={(e) => setStartYear(parseInt(e.target.value))}
+						>
+							<option value=''>Год от</option>
+							{Array.from(
+								{ length: (endYear || new Date().getFullYear()) - 1979 },
+								(_, i) => 1980 + i,
+							)
+								.reverse()
+								.map((year) => (
+									<option key={year} value={year}>
+										{year}
+									</option>
+								))}
+						</select>
 
-								<div>
-									<label>Модель</label>
-									<select
-										name='model'
-										value={filters.model}
-										onChange={handleFilterChange}
-										className='w-full border p-2 rounded disabled:bg-gray-200'
-										disabled={!filters.brand}
-									>
-										<option value=''>Все</option>
-										{models.map((model, index) => (
-											<option key={index} value={model.MODEL_NAME}>
-												{model.MODEL_NAME}
-											</option>
-										))}
-									</select>
-								</div>
+						<select
+							className='w-full border border-gray-300 rounded-md px-3 py-2 mt-4 disabled:bg-gray-200'
+							value={startMonth}
+							onChange={(e) => setStartMonth(e.target.value)}
+						>
+							<option value=''>Месяц от</option>
+							{Array.from({ length: 12 }, (_, i) => {
+								const value = (i + 1).toString().padStart(2, '0')
+								const monthNames = [
+									'Январь',
+									'Февраль',
+									'Март',
+									'Апрель',
+									'Май',
+									'Июнь',
+									'Июль',
+									'Август',
+									'Сентябрь',
+									'Октябрь',
+									'Ноябрь',
+									'Декабрь',
+								]
+								return (
+									<option key={value} value={value}>
+										{monthNames[i]}
+									</option>
+								)
+							})}
+						</select>
+					</div>
+					<div className='grid grid-cols-2 gap-3'>
+						<select
+							className='w-full border border-gray-300 rounded-md px-3 py-2 mt-4 disabled:bg-gray-200'
+							value={endYear}
+							onChange={(e) => setEndYear(parseInt(e.target.value))}
+						>
+							<option value=''>Год до</option>
+							{Array.from(
+								{
+									length: new Date().getFullYear() - (startYear || 1980) + 1,
+								},
+								(_, i) => (startYear || 1980) + i,
+							)
+								.reverse()
+								.map((year) => (
+									<option key={year} value={year}>
+										{year}
+									</option>
+								))}
+						</select>
 
-								<div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
-									<div>
-										<label>Год (от)</label>
-										<select
-											name='yearFrom'
-											value={filters.yearFrom}
-											onChange={handleFilterChange}
-											className='w-full border p-2 rounded'
-										>
-											<option value=''>Любой</option>
-											{filteredYearsFrom.reverse().map((year) => (
-												<option key={year} value={year}>
-													{year}
-												</option>
-											))}
-										</select>
-									</div>
-									<div>
-										<label>Год (до)</label>
-										<select
-											name='yearTo'
-											value={filters.yearTo}
-											onChange={handleFilterChange}
-											className='w-full border p-2 rounded'
-										>
-											<option value=''>Любой</option>
-											{filteredYearsTo.reverse().map((year) => (
-												<option key={year} value={year}>
-													{year}
-												</option>
-											))}
-										</select>
-									</div>
-								</div>
-
-								<div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
-									<div>
-										<label>Пробег (от, км)</label>
-										<input
-											type='number'
-											name='mileageFrom'
-											value={filters.mileageFrom}
-											onChange={handleMileageChange}
-											className='w-full border p-2 rounded'
-											placeholder='От'
-											min={0}
-										/>
-									</div>
-									<div>
-										<label>Пробег (до, км)</label>
-										<input
-											type='number'
-											name='mileageTo'
-											value={filters.mileageTo}
-											onChange={handleMileageChange}
-											className='w-full border p-2 rounded'
-											placeholder='До'
-										/>
-									</div>
-								</div>
-
-								<div className='mb-4'>
-									<label
-										className='block text-gray-700 font-semibold mb-2'
-										htmlFor='capacity-from'
-									>
-										Объём двигателя (от)
-									</label>
-									<div className='relative'>
-										<select
-											name='capacityFrom'
-											id='capacity-from'
-											className='block w-full bg-white border border-gray-300 rounded-lg shadow-sm py-2 px-3 text-gray-700 focus:outline-none focus:border-red-500 focus:ring focus:ring-red-200 transition duration-300'
-											value={filters.capacityFrom}
-											onChange={handleCapacityChange}
-										>
-											<option value=''>Любой</option>
-											<option value='1398'>1,4</option>
-											<option value='1498'>1,5</option>
-											<option value='1598'>1,6</option>
-											<option value='1798'>1,8</option>
-											<option value='1998'>2,0</option>
-											<option value='2198'>2,2</option>
-											<option value='2498'>2,5</option>
-											<option value='2998'>3,0</option>
-											<option value='3498'>3,5</option>
-											<option value='3798'>3,8</option>
-											<option value='3998'>4,0</option>
-											<option value='7000'>Более 4,0</option>
-										</select>
-									</div>
-								</div>
-
-								<div className='mb-4'>
-									<label
-										className='block text-gray-700 font-semibold mb-2'
-										htmlFor='capacity-to'
-									>
-										Объём двигателя (до)
-									</label>
-									<div className='relative'>
-										<select
-											name='capacityTo'
-											id='capacity-to'
-											className='block w-full bg-white border border-gray-300 rounded-lg shadow-sm py-2 px-3 text-gray-700 focus:outline-none focus:border-red-500 focus:ring focus:ring-red-200 transition duration-300'
-											value={filters.capacityTo}
-											onChange={handleCapacityChange}
-										>
-											<option value=''>Любой</option>
-											<option value='7000'>Более 4,0</option>
-											<option value='3998'>4,0</option>
-											<option value='3798'>3,8</option>
-											<option value='3498'>3,5</option>
-											<option value='2998'>3,0</option>
-											<option value='2198'>2,2</option>
-											<option value='2498'>2,5</option>
-											<option value='1998'>2,0</option>
-											<option value='1798'>1,8</option>
-											<option value='1598'>1,6</option>
-											<option value='1498'>1,5</option>
-											<option value='1398'>1,4</option>
-										</select>
-									</div>
-								</div>
-
-								<div className='filter__item mb-4'>
-									<label
-										className='block text-gray-700 font-semibold mb-2'
-										htmlFor='price-from'
-									>
-										Цена (от, воны)
-									</label>
-									<input
-										type='number'
-										id='price-from'
-										name='priceFrom'
-										placeholder='0'
-										className='block w-full bg-white border border-gray-300 rounded-lg shadow-sm py-2 px-3 text-gray-700 focus:outline-none focus:border-red-500 focus:ring focus:ring-red-200 transition duration-300'
-										value={filters.priceFrom}
-										onChange={(e) =>
-											setFilters((prevFilters) => ({
-												...prevFilters,
-												priceFrom: e.target.value,
-											}))
-										}
-									/>
-								</div>
-
-								<div className='filter__item mb-4'>
-									<label
-										className='block text-gray-700 font-semibold mb-2'
-										htmlFor='price-to'
-									>
-										Цена (до, воны)
-									</label>
-									<input
-										type='number'
-										id='price-to'
-										name='priceTo'
-										placeholder='∞'
-										className='block w-full bg-white border border-gray-300 rounded-lg shadow-sm py-2 px-3 text-gray-700 focus:outline-none focus:border-red-500 focus:ring focus:ring-red-200 transition duration-300'
-										value={filters.priceTo}
-										onChange={(e) =>
-											setFilters((prevFilters) => ({
-												...prevFilters,
-												priceTo: e.target.value,
-											}))
-										}
-									/>
-								</div>
-							</div>
-
-							<div className='mb-4'>
-								<label className='block text-gray-700 font-semibold mb-2'>
-									Сортировка
-								</label>
-								<select
-									name='sort'
-									value={sortOption}
-									onChange={handleSortChange}
-									className='w-full border p-2 rounded'
-								>
-									{sortOptions.map((option) => (
-										<option key={option.value} value={option.value}>
-											{option.label}
+						<select
+							className='w-full border border-gray-300 rounded-md px-3 py-2 mt-4 disabled:bg-gray-200'
+							value={endMonth}
+							onChange={(e) => setEndMonth(e.target.value)}
+						>
+							<option value=''>Месяц до</option>
+							{Array.from({ length: 12 }, (_, i) => {
+								const value = (i + 1).toString().padStart(2, '0')
+								return { value, i }
+							})
+								.filter(
+									({ value }) =>
+										!startMonth || parseInt(value) >= parseInt(startMonth),
+								)
+								.map(({ value, i }) => {
+									const monthNames = [
+										'Январь',
+										'Февраль',
+										'Март',
+										'Апрель',
+										'Май',
+										'Июнь',
+										'Июль',
+										'Август',
+										'Сентябрь',
+										'Октябрь',
+										'Ноябрь',
+										'Декабрь',
+									]
+									return (
+										<option key={value} value={value}>
+											{monthNames[i]}
 										</option>
-									))}
-								</select>
-							</div>
-
-							<div className='flex justify-between mt-4'>
-								<button
-									type='button'
-									onClick={resetFilters}
-									className='bg-gray-400 hover:bg-gray-500 text-white font-semibold py-2 px-4 rounded cursor-pointer'
-								>
-									Сбросить фильтр
-								</button>
-								<button
-									type='button'
-									onClick={applyFilters}
-									className='bg-red-600 hover:bg-red-700 text-white font-semibold py-2 px-4 rounded cursor-pointer'
-								>
-									Поиск
-								</button>
-							</div>
-						</form>
+									)
+								})}
+						</select>
 					</div>
 
-					{/* Сетка карточек автомобилей */}
-					{cars.length > 0 ? (
-						<div className='flex flex-col md:w-3/4'>
-							<h2 className='mt-5 text-center font-medium md:mt-0 md:text-left md:ml-5 md:mb-5'>
-								Последнее поступление
-							</h2>
-							<div className='grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 md:gap-8 w-full md:ml-5'>
-								{cars.map((car) => (
-									<CarCard usdKrwRate={usdKrwRate} key={car.ID} car={car} />
+					<select
+						className='w-full border border-gray-300 rounded-md px-3 py-2 mt-4 disabled:bg-gray-200'
+						value={mileageStart}
+						onChange={(e) => setMileageStart(e.target.value)}
+					>
+						<option value=''>Пробег от</option>
+						{Array.from({ length: 20 }, (_, i) => {
+							const mileage = (i + 1) * 10000
+							return (
+								<option key={mileage} value={mileage}>
+									{mileage.toLocaleString()} км
+								</option>
+							)
+						})}
+					</select>
+
+					<select
+						className='w-full border border-gray-300 rounded-md px-3 py-2 mt-4 disabled:bg-gray-200'
+						value={mileageEnd}
+						onChange={(e) => setMileageEnd(e.target.value)}
+					>
+						<option value=''>Пробег До</option>
+						{Array.from({ length: 20 }, (_, i) => {
+							const mileage = (i + 1) * 10000
+							return (
+								<option key={mileage} value={mileage}>
+									{mileage.toLocaleString()} км
+								</option>
+							)
+						})}
+					</select>
+
+					<div className='grid grid-cols-2 gap-3 mt-4'>
+						<select
+							className='w-full border border-gray-300 rounded-md px-3 py-2'
+							value={priceStart}
+							onChange={(e) => {
+								const value = e.target.value
+								setPriceStart(value)
+								if (priceEnd && parseInt(value) > parseInt(priceEnd)) {
+									setPriceEnd('')
+								}
+							}}
+						>
+							<option value=''>Цена от</option>
+							{Array.from({ length: 100 }, (_, i) => (i + 1) * 100)
+								.filter((price) => !priceEnd || price <= parseInt(priceEnd))
+								.map((price) => (
+									<option key={price} value={price}>
+										₩{(price * 10000).toLocaleString()}
+									</option>
 								))}
-							</div>
-						</div>
-					) : (
-						<div className='grid grid-cols-1 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 w-full md:ml-5'>
-							<h1>Автомобили не найдены</h1>
-						</div>
-					)}
+						</select>
+
+						<select
+							className='w-full border border-gray-300 rounded-md px-3 py-2'
+							value={priceEnd}
+							onChange={(e) => {
+								const value = e.target.value
+								setPriceEnd(value)
+								if (priceStart && parseInt(value) < parseInt(priceStart)) {
+									setPriceStart('')
+								}
+							}}
+						>
+							<option value=''>Цена до</option>
+							{Array.from({ length: 100 }, (_, i) => (i + 1) * 100)
+								.filter((price) => !priceStart || price >= parseInt(priceStart))
+								.map((price) => (
+									<option key={price} value={price}>
+										₩{(price * 10000).toLocaleString()}
+									</option>
+								))}
+						</select>
+					</div>
+
+					<input
+						type='text'
+						placeholder='Поиск по номеру авто (например, 49сер0290)'
+						className='w-full border border-gray-300 rounded-md px-3 py-2 mt-5'
+						value={searchByNumber}
+						onChange={(e) => {
+							setSearchByNumber(e.target.value)
+							setCurrentPage(1)
+						}}
+					/>
+
+					<button
+						className='w-full bg-red-500 text-white py-2 px-4 mt-5 rounded hover:bg-red-600 transition cursor-pointer'
+						onClick={() => {
+							setSelectedManufacturer('')
+							setSelectedModelGroup('')
+							setSelectedModel('')
+							setSelectedConfiguration('')
+							setSelectedBadge('')
+							setSelectedBadgeDetails('')
+							setStartYear('')
+							setStartMonth('00')
+							setEndYear('')
+							setEndMonth('00')
+							setMileageStart('')
+							setMileageEnd('')
+							setPriceStart('')
+							setPriceEnd('')
+							setSearchByNumber('')
+							setCurrentPage(1)
+							navigate('/catalog')
+						}}
+					>
+						Сбросить фильтры
+					</button>
 				</div>
 
-				{/* Лоадер при загрузке данных */}
-				{loading && <Loader />}
-
-				{/* Пагинация */}
-				{!loading && renderPagination()}
+				{loading ? (
+					<div className='flex justify-center items-center h-screen'>
+						<Loader />
+					</div>
+				) : cars.length > 0 ? (
+					<div className='md:col-span-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mt-8'>
+						<div className='w-full md:hidden'>
+							<label htmlFor='sortOptions' className='mb-2 block text-center'>
+								Сортировать по
+							</label>
+							<select
+								className='border border-gray-300 rounded-md px-4 py-2 shadow-sm w-full'
+								value={sortOption}
+								onChange={(e) => {
+									setSortOption(e.target.value)
+									setCurrentPage(1)
+								}}
+							>
+								<option value='newest'>Сначала новые</option>
+								<option value='priceAsc'>Цена: по возрастанию</option>
+								<option value='priceDesc'>Цена: по убыванию</option>
+								<option value='mileageAsc'>Пробег: по возрастанию</option>
+								<option value='mileageDesc'>Пробег: по убыванию</option>
+								<option value='yearDesc'>Год: от новых</option>
+							</select>
+						</div>
+						{cars.map((car) => (
+							<CarCard key={car.Id} car={car} usdKrwRate={usdKrwRate} />
+						))}
+					</div>
+				) : (
+					<div className='flex justify-center items-center h-32'>
+						<p className='text-xl font-semibold text-gray-700'>
+							{error || 'Автомобили не найдены'}
+						</p>
+					</div>
+				)}
 			</div>
+			{cars.length > 0 && totalCars > 20 && (
+				<div className='flex justify-center mt-10 mb-10'>
+					<div className='flex flex-wrap justify-center items-center gap-2 px-4 max-w-full'>
+						{currentPage > 1 && (
+							<button
+								onClick={() => setCurrentPage(currentPage - 1)}
+								className='cursor-pointer w-10 h-10 flex items-center justify-center border rounded-md text-sm font-medium shadow-sm bg-white text-gray-800 hover:bg-gray-100'
+							>
+								‹
+							</button>
+						)}
+						{Array.from({ length: Math.ceil(totalCars / 20) }, (_, i) => i + 1)
+							.filter((page) => {
+								if (currentPage <= 3) return page <= 5
+								const lastPage = Math.ceil(totalCars / 20)
+								if (currentPage >= lastPage - 2) return page >= lastPage - 4
+								return page >= currentPage - 2 && page <= currentPage + 2
+							})
+							.map((page) => (
+								<button
+									key={page}
+									onClick={() => setCurrentPage(page)}
+									className={`cursor-pointer w-10 h-10 flex items-center justify-center border rounded-md text-sm font-medium shadow-sm transition-all duration-200 ${
+										currentPage === page
+											? 'bg-black text-white'
+											: 'bg-white text-gray-800 hover:bg-gray-100'
+									}`}
+								>
+									{page}
+								</button>
+							))}
+						{currentPage < Math.ceil(totalCars / 20) && (
+							<button
+								onClick={() => setCurrentPage(currentPage + 1)}
+								className='cursor-pointer w-10 h-10 flex items-center justify-center border rounded-md text-sm font-medium shadow-sm bg-white text-gray-800 hover:bg-gray-100'
+							>
+								›
+							</button>
+						)}
+					</div>
+				</div>
+			)}
 		</div>
 	)
 }
