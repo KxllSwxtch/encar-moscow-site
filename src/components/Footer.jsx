@@ -29,9 +29,9 @@ const Footer = () => {
 					<a href='/contact' className='hover:text-red-500 transition'>
 						Контакты
 					</a>
-					<a href='#calculator' className='hover:text-red-500 transition'>
+					{/* <a href='#calculator' className='hover:text-red-500 transition'>
 						Калькулятор
-					</a>
+					</a> */}
 				</nav>
 
 				{/* Контакты */}

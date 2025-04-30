@@ -85,10 +85,10 @@ const Header = () => {
 
 				<nav className='hidden lg:flex lg:space-x-2 lg:text-md xl:text-lg xl:space-x-6 font-semibold'>
 					<Link
-						to='/about'
+						to='/'
 						className='hover:text-red-500 transition-all duration-300'
 					>
-						О нас
+						Главная
 					</Link>
 					<Link
 						to='/catalog'
@@ -101,12 +101,6 @@ const Header = () => {
 						className='hover:text-red-500 transition-all duration-300'
 					>
 						Контакты
-					</Link>
-					<Link
-						className='hover:text-red-500 transition-all duration-300'
-						to='/why-us'
-					>
-						7 причин выбрать нас
 					</Link>
 					{/* <Link className='hover:text-red-500 duration-300' to='/for-partners'>
 						Для партнёров
@@ -242,11 +236,11 @@ const Header = () => {
 							{/* Навигация */}
 							<nav className='flex flex-col space-y-4 text-xl font-semibold'>
 								<Link
-									to='/about'
-									className='hover:text-red-500'
+									to='/'
+									className='hover:text-red-500 transition-all duration-300'
 									onClick={toggleMenu}
 								>
-									О нас
+									Главная
 								</Link>
 								<Link
 									to='/catalog'
@@ -254,12 +248,6 @@ const Header = () => {
 									onClick={toggleMenu}
 								>
 									Каталог автомобилей
-								</Link>
-								<Link
-									className='hover:text-red-500 transition-all duration-300'
-									to='/why-us'
-								>
-									7 причин выбрать нас
 								</Link>
 								{/* <Link
 									className='hover:text-red-500 duration-300'

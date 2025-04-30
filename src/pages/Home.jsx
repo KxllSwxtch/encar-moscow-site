@@ -3,6 +3,10 @@ import {
 	BrandSlider,
 	StepsSection,
 	PartnersSection,
+	WhyChooseUs,
+	About,
+	CatalogSection,
+	ContactForm,
 } from '../components'
 
 const Home = () => {
@@ -10,8 +14,12 @@ const Home = () => {
 		<>
 			<HeroSection />
 			<BrandSlider />
+			<About />
 			<PartnersSection />
+			<CatalogSection />
+			<WhyChooseUs />
 			<StepsSection />
+			<ContactForm />
 		</>
 	)
 }
