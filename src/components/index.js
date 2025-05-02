@@ -13,6 +13,7 @@ import CarInspection from './CarInspection'
 import CatalogSection from './CatalogSection'
 import CarCard from './CarCard'
 import Loader from './Loader'
+import OrderModal from './OrderModal'
 
 export {
 	Header,
@@ -30,4 +31,5 @@ export {
 	CatalogSection,
 	CarCard,
 	Loader,
+	OrderModal,
 }

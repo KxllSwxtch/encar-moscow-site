@@ -1,15 +1,25 @@
 import axios from 'axios'
 import * as cheerio from 'cheerio'
-import { use, useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { Swiper, SwiperSlide } from 'swiper/react'
 import { Navigation, Pagination } from 'swiper/modules'
-import { FaInstagram, FaTelegram, FaWhatsapp } from 'react-icons/fa'
+import {
+	FaInstagram,
+	FaTelegram,
+	FaWhatsapp,
+	FaShoppingCart,
+} from 'react-icons/fa'
 import { doc, getDoc, setDoc, updateDoc, arrayUnion } from 'firebase/firestore'
 import 'swiper/css'
 import 'swiper/css/navigation'
 import 'swiper/css/pagination'
-import { Loader, CarInspection, KazakhstanCalculator } from '../components'
+import {
+	Loader,
+	CarInspection,
+	KazakhstanCalculator,
+	OrderModal,
+} from '../components'
 import { useAuth } from '../hooks/useAuth'
 import { db } from '../firebase'
 
@@ -67,12 +77,12 @@ const colorTranslations = {
 
 const CarDetails = () => {
 	const [vehicleId, setVehicleId] = useState(null)
-	const [calculatedResultKZ, setCalculatedResultKZ] = useState(null)
+	// const [calculatedResultKZ, setCalculatedResultKZ] = useState(null)
 
 	const [usdKrwRate, setUsdKrwRate] = useState(null)
 	const [usdRubRate, setUsdRubRate] = useState(null)
 	const [usdKztRate, setUsdKztRate] = useState(null)
-	const [usdEurRate, setUsdEurRate] = useState(null)
+	// const [usdEurRate, setUsdEurRate] = useState(null)
 	const [usdtRubRates, setUsdtRubRates] = useState(null)
 
 	const [car, setCar] = useState(null)
@@ -83,6 +93,7 @@ const CarDetails = () => {
 	const [errorCalc, setErrorCalc] = useState('')
 	const [calculatedResult, setCalculatedResult] = useState(null)
 	const [drivetrain, setDrivetrain] = useState('')
+	const [isOrderModalOpen, setIsOrderModalOpen] = useState(false)
 
 	const { carId } = useParams()
 	const { user } = useAuth() // Пользователь
@@ -166,7 +177,7 @@ const CarDetails = () => {
 				} else {
 					setDrivetrain('2WD')
 				}
-			} catch (e) {
+			} catch (error) {
 				console.warn(
 					'Inspection fetch failed or empty, fallback to empty drivetrain.',
 				)
@@ -189,15 +200,13 @@ const CarDetails = () => {
 					const rate = jsonData['usd']['krw']
 					const usdRubRate = jsonData['usd']['rub']
 					const usdKztRate = jsonData['usd']['kzt']
-					const usdEurRate = jsonData['usd']['eur']
 
 					setUsdKrwRate(rate)
 					setUsdRubRate(usdRubRate)
 					setUsdKztRate(usdKztRate + 3)
-					setUsdEurRate(usdEurRate)
 				}
-			} catch (e) {
-				console.error(e)
+			} catch (error) {
+				console.error(error)
 			}
 		}
 
@@ -314,17 +323,6 @@ const CarDetails = () => {
 				},
 			)
 
-			console.log({
-				owner: 1,
-				age: calculateAge(parseInt(car?.category?.formYear)),
-				engine: car?.spec?.fuelName === '가솔린' ? 1 : 2,
-				power: 1,
-				power_unit: 1,
-				value: car?.spec?.displacement,
-				price: car?.advertisement?.price * 10000,
-				curr: 'KRW',
-			})
-
 			if (!response.status === 200) throw new Error('Ошибка при расчёте')
 
 			const data = await response.data
@@ -362,8 +360,6 @@ const CarDetails = () => {
 				totalWithTruck,
 				totalWithLorry,
 			})
-
-			console.log(totalWithTruck, totalWithLorry)
 		} catch (err) {
 			setErrorCalc(err.message)
 		} finally {
@@ -381,17 +377,6 @@ const CarDetails = () => {
 
 		// Расчет возраста в годах
 		const ageInYears = currentYear - yearInt
-
-		// Для таможенного расчета важно количество полных лет
-		// 2021 год в 2024 - это 3 года, то есть категория "3-5"
-		console.log(
-			'Год авто:',
-			yearInt,
-			'Текущий год:',
-			currentYear,
-			'Возраст в годах:',
-			ageInYears,
-		)
 
 		if (ageInYears < 3) {
 			return '0-3'
@@ -752,19 +737,52 @@ const CarDetails = () => {
 							</strong>
 						</p>
 					</div>
+
+					{/* Кнопка заказа */}
+					<div className='mt-8 mb-6 flex justify-center'>
+						<button
+							onClick={() => setIsOrderModalOpen(true)}
+							className='btn-order py-4 px-10 bg-gradient-to-r from-red-500 to-red-600 text-white text-xl font-bold rounded-lg shadow-lg flex items-center'
+						>
+							<FaShoppingCart className='mr-2' /> Заказать автомобиль
+						</button>
+					</div>
 				</div>
 			)}
 
 			{/* КЗ */}
 			{selectedCountry === 'kazakhstan' && (
-				<KazakhstanCalculator
-					usdKztRate={usdKztRate}
-					usdKrwRate={usdKrwRate}
-					carPriceKRW={carPriceKorea}
-				/>
+				<>
+					<KazakhstanCalculator
+						usdKztRate={usdKztRate}
+						usdKrwRate={usdKrwRate}
+						carPriceKRW={carPriceKorea}
+					/>
+
+					{/* Кнопка заказа для Казахстана */}
+					<div className='mt-8 mb-6 flex justify-center'>
+						<button
+							onClick={() => setIsOrderModalOpen(true)}
+							className='btn-order py-4 px-10 bg-gradient-to-r from-green-500 to-green-600 text-white text-xl font-bold rounded-lg shadow-lg flex items-center'
+						>
+							<FaShoppingCart className='mr-2' /> Заказать автомобиль
+						</button>
+					</div>
+				</>
 			)}
 
 			{errorCalc && <p className='text-center text-red-500'>{errorCalc}</p>}
+
+			{/* Модальное окно заказа */}
+			<OrderModal
+				isOpen={isOrderModalOpen}
+				onClose={() => setIsOrderModalOpen(false)}
+				carName={
+					car
+						? `${formattedCarName} ${formattedModelGroup} ${car?.category?.gradeEnglishName}`
+						: ''
+				}
+			/>
 
 			<a
 				href='https://t.me/+Ndi8rrAfpg00ZGJl'
