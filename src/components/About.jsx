@@ -2,7 +2,7 @@ import { motion } from 'framer-motion'
 
 const About = () => {
 	return (
-		<section className='py-16 px-6 max-w-6xl mx-auto text-center mt-10 md:mt-20'>
+		<section className='py-10 px-6 max-w-6xl mx-auto text-center md:mt-10'>
 			{/* Заголовок с анимацией */}
 			<motion.h1
 				className='text-4xl md:text-5xl font-bold uppercase'

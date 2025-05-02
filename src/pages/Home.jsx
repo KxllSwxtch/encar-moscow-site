@@ -7,6 +7,7 @@ import {
 	About,
 	CatalogSection,
 	ContactForm,
+	CompanyStats,
 } from '../components'
 
 const Home = () => {
@@ -14,6 +15,7 @@ const Home = () => {
 		<>
 			<HeroSection />
 			<BrandSlider />
+			<CompanyStats />
 			<About />
 			<PartnersSection />
 			<CatalogSection />

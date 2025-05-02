@@ -15,6 +15,7 @@ export function translateSmartly(text) {
 }
 
 const translations = {
+	초이스: 'Choice',
 	프로그레시브: 'Progressive',
 	파사트: 'Passat',
 	아틀라스: 'Atlas',

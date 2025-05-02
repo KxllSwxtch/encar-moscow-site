@@ -14,6 +14,7 @@ import CatalogSection from './CatalogSection'
 import CarCard from './CarCard'
 import Loader from './Loader'
 import OrderModal from './OrderModal'
+import CompanyStats from './CompanyStats'
 
 export {
 	Header,
@@ -32,4 +33,5 @@ export {
 	CarCard,
 	Loader,
 	OrderModal,
+	CompanyStats,
 }
