@@ -30,7 +30,7 @@ const Catalog = () => {
 	const [mileageEnd, setMileageEnd] = useState('')
 
 	const [endYear, setEndYear] = useState('')
-	const [endMonth, setEndMonth] = useState('00')
+	const [endMonth, setEndMonth] = useState('99')
 
 	const [startYear, setStartYear] = useState('')
 	const [startMonth, setStartMonth] = useState('00')
@@ -511,6 +511,7 @@ const Catalog = () => {
 			filters.push(`Mileage.range(..${mileageEnd}).`)
 		}
 
+		// Year filtering logic
 		if (startYear && startMonth && endYear && endMonth) {
 			filters.push(
 				`Year.range(${startYear}${startMonth}..${endYear}${endMonth}).`,

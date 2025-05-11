@@ -34,7 +34,7 @@ const CalculatorSection = () => {
 
 		try {
 			const response = await axios.post(
-				'https://corsproxy.io/?key=28174bc7&url=https://calcus.ru/calculate/Customs',
+				'https://calcus.ru/calculate/Customs',
 				new URLSearchParams({
 					owner: 1,
 					age: calculateAge(carYear, carMonth),

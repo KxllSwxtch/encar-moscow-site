@@ -337,7 +337,7 @@ const HeroSection = () => {
 			<AnimatePresence>
 				{isModalOpen && (
 					<motion.div
-						className='fixed inset-0 flex items-center justify-center z-50 text-black before:content-[""] before:absolute before:inset-0 before:bg-black before:opacity-50 overflow-scroll pt-40 md:pt-0'
+						className=' fixed inset-0 z-50 text-black overflow-auto pt-10 md:pt-20'
 						initial={{ opacity: 0 }}
 						animate={{ opacity: 1 }}
 						exit={{ opacity: 0 }}
@@ -346,7 +346,7 @@ const HeroSection = () => {
 						}}
 					>
 						<motion.div
-							className='bg-white p-8 rounded-lg shadow-lg w-full max-w-5xl relative'
+							className='bg-white p-8 rounded-lg shadow-lg mx-auto w-full max-w-3xl md:mt-20 relative'
 							initial={{ y: -50, opacity: 0 }}
 							animate={{ y: 0, opacity: 1 }}
 							exit={{ y: -50, opacity: 0 }}
