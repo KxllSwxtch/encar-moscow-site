@@ -93,7 +93,7 @@ const HeroSection = () => {
 
 				// data -> iNav -> Nodes[2] -> Nodes[2]?.Facets -> Nodes[2]?.Facets[0]?.Refinements?.Nodes[0]?.Facets
 				const manufacturersList =
-					data?.iNav?.Nodes[2]?.Facets[0]?.Refinements?.Nodes[0]?.Facets
+					data?.iNav?.Nodes[1]?.Facets[0]?.Refinements?.Nodes[0]?.Facets
 
 				setManufacturers(manufacturersList)
 			} catch (error) {
