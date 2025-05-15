@@ -2,7 +2,7 @@ import { FaInstagram, FaTelegramPlane, FaYoutube } from 'react-icons/fa'
 
 const PartnersSection = () => {
 	return (
-		<section className='py-12 bg-gray-50 text-center'>
+		<section className='py-12 bg-gray-50 text-center' id='partners'>
 			<h2 className='text-4xl font-bold mb-10 text-gray-900 uppercase tracking-wide'>
 				Официальные партнёры Encar
 			</h2>

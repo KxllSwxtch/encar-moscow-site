@@ -29,7 +29,7 @@ const steps = [
 
 const StepsSection = () => {
 	return (
-		<section className='py-16 bg-white text-center'>
+		<section className='py-16 bg-white text-center' id='support'>
 			{/* Заголовок */}
 			<motion.h2
 				className='text-3xl md:text-4xl font-bold uppercase'

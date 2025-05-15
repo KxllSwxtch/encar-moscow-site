@@ -41,7 +41,7 @@ const CatalogSection = () => {
 	}, [])
 
 	return (
-		<div>
+		<div id='fresh-cars'>
 			<h1 className='text-2xl font-bold text-center mb-4'>
 				8 свежих автомобилей
 			</h1>
